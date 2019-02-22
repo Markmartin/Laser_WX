@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>雷士伯克丽智能家居</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+    <link href="css/weui.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadFunction()">
+<div class="container-fluid padding-b250">
+    <div id="hasDevice" class="">
+        <div id="DeviceList"></div>
+        <div class="row  margin-t73">
+            <div class="col-xs-12 tac dn" id="hand" onclick="jumpToAddChildDeviceEvent()">
+                <span class="btn_highlight_large">手动添加灯具</span>
+            </div>
+        </div>
+        <div class="row  margin-t20">
+            <div class="col-xs-12 tac" onclick="scanQRCodeEvent()">
+                <span class="btn_highlight_large">二维码添加分享的灯具</span>
+            </div>
+        </div>
+        <div class="row  margin-t20">
+            <div class="col-xs-12 tac dn" id="sync" onclick="synDeviceEvent()">
+                <span class="btn_highlight_large">一键分享全部灯具</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="weui-toast" id="loading">
+    <i class="weui-loading weui-icon_toast"></i>
+    <p class="weui-toast__content">加载中</p>
+</div>
+
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/md5.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<!--<script src="js/btn_press.js"></script>-->
+<script src="js/md5.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/gizwits_ws_0.3.0.min.js"></script>
+<script src="js/dn.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/timer.js"></script>
+<script src="device_js/net.js?1.1.1"></script>
+<script src="device_js/zadevice.js?1.1.1"></script>
+<script src="device_js/utils.js?1.1.1"></script>
+<script src="device_js/websocket.js"></script>
+<script src="device_js/websocket_instance.js"></script>
+<script src="device_js/ShareManager.js"></script>
+
+<script type="text/javascript">
+    wx.config({
+        beta: true,
+        debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: '${appid}', // 必填，公众号的唯一标识
+        timestamp: '${signature.timestamp}', // 必填，生成签名的时间戳
+        nonceStr: '${signature.noncestr}', // 必填，生成签名的随机串
+        signature: '${signature.signature}',// 必填，签名，见附录1
+        jsApiList: ['scanQRCode', 'openWXDeviceLib', 'getWXDeviceTicket'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+    });
+
+    //网关下的子设备列表
+    var childDevices = new Array();
+    //网关设备
+    var gatewayDevice;
+    var finalHtml;
+
+    function loadFunction() {
+
+
+        $("#loading").fadeIn();
+        var device = localStorage.getItem('device');
+
+        gatewayDevice = new ZADevice(JSON.parse(device));
+        var getChildDeviceCB = function (devices) {
+            $("#loading").fadeOut();
+            updateChildDeviceList(devices);
+        };
+
+        var net = new Net();
+        net.getChildDeviceList(gatewayDevice, getChildDeviceCB);
+
+        if (gatewayDevice.getHasAddChildRole()) {
+            $("#hand").removeClass("dn");
+            $("#sync").removeClass("dn");
+        }
+
+        setTimeout(function () {
+            $("#loading").fadeOut();
+        }, 20 * 1000)
+    }
+
+    function toggleSwitch(evt) {
+        console.log("evt====" + evt);
+        console.log($("#evt").children("img"));
+
+        var currentDevice = childDevices[evt];
+
+        if (currentDevice.is_online) {
+            if (currentDevice.open == true) {
+                currentDevice.openORclose(false);
+                $("#switch_" + evt).attr("src", "img/equipment_close.png");
+            } else {
+                currentDevice.openORclose(true);
+                $("#switch_" + evt).attr("src", "img/equipment_open.png");
+            }
+        } else {
+            return;
+        }
+
+
+    }
+
+    function jumpToSettingPage(evt) {
+        var device = childDevices[evt];
+        var paramDate = new Date(new Date().getTime() + 60000);
+
+
+//        device.getTimerList(function (result) {
+//
+//        })
+//        device.setTimer(true,new Date(),true,function (status,result) {
+//
+//        },[6,4,5]);
+
+//        device.setRepeatTimeOfWeek([0,1,2,3,4,5,6],paramDate,function (result) {
+//            console.log(result);
+//        })
+        localStorage.setItem('ChilidDevice', JSON.stringify(device));
+//        var device = localStorage.getItem('device');
+//        $.cookie('ChilidDevice', JSON.stringify(device));
+        // $(location).attr("href", "deviceSetting.html?=" + JSON.stringify(device));
+        $(location).attr("href", "deviceSetting.html");
+    }
+
+    function jumpToChangePage(evt) {
+        var device = childDevices[evt];
+        if (device.is_online) {
+            localStorage.setItem('ChilidDevice', JSON.stringify(device));
+//            $.cookie('ChilidDevice', JSON.stringify(device));
+            // $(location).attr("href", "deviceLight.html?device=" + JSON.stringify(device));
+            $(location).attr("href", "deviceLight.html?");
+        } else {
+            return;
+        }
+
+    }
+
+    function jumpToAddChildDeviceEvent() {
+        // $.cookie('ChilidDevice', JSON.stringify(device));
+        $(location).attr("href", "addChildDevice.html");
+    }
+
+    function scanQRCodeEvent() {
+        deviceScanQRCode(gatewayDevice.did);
+    }
+
+    function synDeviceEvent() {
+        ShareManager.createQRCode(childDevices, function (status, resp) {
+            if (status == true) {
+                resp = resp + "||&did=" + gatewayDevice.did + "&other";
+                var net = new Net();
+                net.storageLiveCode(resp,function (status,resp) {
+                    if (status == true)
+                    {
+                        localStorage.setItem("qrCode", resp.data.id)
+                        $(location).attr("href", "settingDeviceShare.html");
+                    }
+                })
+            } else {
+                alert("无权分享")
+            }
+        })
+    }
+
+
+    function updateChildDeviceList(devices) {
+
+        childDevices = devices;
+        finalHtml = '';
+        $("#DeviceList").html(finalHtml);
+
+        for (var i = 0; i < devices.length; i++) {
+            console.log("childdevice开关状态===" + devices[i].open);
+            console.log('=================第' + i + '个虚拟设备=================================');
+            console.log("已绑定设备，did=" + devices[i].did + '   sdid:' + devices[i].sdid + "\nis_online=" + devices[i].online);
+            console.log("已绑定设备，pk=" + devices[i].product_key);
+            console.log('=================第' + i + '个虚拟设备结束=================================');
+
+            //监听设备状态
+            devices[i].setStatusChangeNotify(function (statusChangeNotiType, device) {
+                if (statusChangeNotiType == StatusChangeNotiType.StatusChangeNotiTypeStatus) {
+
+                    $("#device_name_" + i).text(device.dev_alias);
+                    $("#device_remark_" + i).text(device.remark);
+                    var path;
+                    if (device.open == true) {
+                        path = "img/equipment_open.png";
+                    } else {
+                        path = "img/equipment_close.png";
+                    }
+                    for (var index in devices) {
+                        var de = devices[index];
+                        if (de.did == device.did) {
+                            $("#switch_" + index).attr("src", path);
+                            break;
+                        }
+                    }
+                }
+            });
+
+
+            //设备读取状态
+            var switchPath;
+            var isOnlinePath;
+            var lightPath;
+            if (devices[i].is_online == true) {
+                if (devices[i].open == true) {
+                    switchPath = "img/equipment_open.png";
+                } else {
+                    switchPath = "img/equipment_close.png";
+                }
+                isOnlinePath = "img/equipment1_online.png";
+                lightPath = "img/equipment_change.png";
+            }
+            else {
+                switchPath = "img/equipment_close_disable.png";
+                isOnlinePath = "img/equipment1_offline.png";
+                lightPath = "img/equipment_change_disable.png";
+            }
+
+            var isOwner = devices[i].isGuest == true ? "" : "(管理员)"
+
+            var appendHtml = "<div class='divider1'></div>"
+                + "<div class=''>"
+                + "<div class='row bg-main'>"
+                + "<div class='col-xs-10'>"
+                + "<div class='row'>"
+                + "<div class='col-xs-12  margin-l49 margin-t40'>"
+                + "<span class='font25 white' id='device_name_" + i + "'>" + devices[i].dev_alias + isOwner + "</span>"
+                + "</div>"
+                + "</div>"
+                + "<div class='row'>"
+                + "<div class='col-xs-12  margin-b34'>"
+                + "<img src='" + isOnlinePath + "' class='img-responsive  center-block margin-l49  w13   margin-t13n di' id='device_remark_" + i + "' />"
+                + "<span class='font24 white  margin-t18    margin-l9'>" + devices[i].remark + "</span>"
+                + "</div>"
+                + "</div>"
+                + "</div>"
+                + "<div class='col-xs-2 margin-t45' onclick='toggleSwitch(" + i + ")'>"
+                + "<img src='" + switchPath + "' class='center-block pull-right margin-r49 w90 ' id='switch_" + i + "'/>"
+                + "</div>"
+                + "</div>"
+                + "</div>"
+                + '<div class="divider1"></div>'
+                + "<div class='row bg-main'>"
+                + "<div class='col-xs-6' onclick='jumpToSettingPage(" + i + ")'>"
+                + '<div class="tac margin-l49 margin-tb35  w200">'
+                + ' <span class="  btn_highlight_mid ">设置</span>'
+                + '</div>'
+//                + "<img src='img/equipment_setting.png' class='img-responsive center-block margin-tb35 margin-l49 w200 di btn_set'/>"
+                + "</div>"
+                + "<div class='col-xs-6' >"
+                + " <div id='btn_light_enable_(" + i + ")' onclick='jumpToChangePage(" + i + ")'>"
+//                + "<img src='img/equipment_change.png' class='img-responsive center-block  margin-tb35   pull-right margin-r49  w200 di btn_light'/>"
+                + ' <div class="tac margin-r49 margin-tb35   w200 pull-right">'
+                + '<span class="   btn_highlight_mid ">调光</span>'
+                + ' </div>'
+                + "</div>"
+                + " <div id='btn_light_disable_(" + i + ")' class='dn'>"
+//                + "<img src='img/equipment_change_disable.png' class='img-responsive center-block  margin-tb35   pull-right margin-r49  w200 di '/>"
+                + '<div class="tac margin-r49 margin-tb35   w200 pull-right">'
+                + '<span class="   btn_highlight_mid_disable ">调光</span>'
+                + '</div>'
+                + "</div>"
+                + "</div>"
+                + "</div>"
+                + "<div class='divider2'>"
+                + "</div>";
+            finalHtml = finalHtml + appendHtml;
+            devices[i].readStatus();
+
+        }
+
+        if (devices.length == 0) {
+            var desHtml = "<div class='row  margin-t344'>"
+                + "<div class='col-xs-12 tac'>"
+                + "<span class='yellow font23'>" + "尚无灯具"
+                + "</span>"
+                + "</div>"
+                + "</div>";
+            finalHtml = finalHtml + desHtml;
+        }
+        $("#DeviceList").html(finalHtml);
+
+
+        /* $(".btn_highlight_large,.btn_highlight_mid").on("touchstart mousedown", function () {
+         $(this).addClass("btn_highlight_large_to");
+         });
+         $(".btn_highlight_large,.btn_highlight_mid").on("touchend mouseup", function () {
+         $(this).removeClass("btn_highlight_large_to");
+         });*/
+
+
+        if ('ontouchstart' in window) {
+            $(".btn_highlight_large,.btn_highlight_mid").on("touchstart", sele1);
+            $(".btn_highlight_large,.btn_highlight_mid").on("touchend", sele2);
+        } else {
+            $(".btn_highlight_large,.btn_highlight_mid").on("mousedown", sele1);
+            $(".btn_highlight_large,.btn_highlight_mid").on("mouseup", sele2);
+        }
+
+        function sele1() {
+            $(this).addClass("btn_highlight_large_to");
+        }
+
+        function sele2() {
+            $(this).removeClass("btn_highlight_large_to");
+        }
+    }
+</script>
+</body>
+</html>

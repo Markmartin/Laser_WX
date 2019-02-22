@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--   <meta name="viewport"
+             content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>分享人</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid ">
+    <div class="divider2"></div>
+
+    <div id="shareList"></div>
+    <!--<div class="row bg-main    ">-->
+        <!--<div class="col-xs-12 margin-t33 margin-b28">-->
+            <!--<span class="font26 white   margin-l49  ">家人A</span>-->
+            <!--<img src="img/delete_normal.png" class="    margin-r49 fr 　 w88  "/>-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="divider2"></div>-->
+    <!--<div class="row bg-main    ">-->
+        <!--<div class="col-xs-12 margin-t33 margin-b28">-->
+            <!--<span class="font26 white   margin-l49  ">家人B</span>-->
+            <!--<img src="img/delete_normal.png" class="    margin-r49 fr 　  w88 "/>-->
+        <!--</div>-->
+    <!--</div>-->
+    <!--<div class="divider2"></div>-->
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+
+
+<script>
+    var device;
+    var net;
+    var type;
+    var shareList = new Array();
+    function loadPage() {
+        type = getQueryString("type");
+        device = new ZADevice(JSON.parse(localStorage.getItem(type)))
+        net = new Net();
+        net.getShareList(function (status,resp) {
+            if (status == true)
+            {
+                if (resp.objects != undefined && typeof(resp.objects) == "object" && resp.objects.length > 0)
+                {
+                    for (var index in resp.objects)
+                    {
+                        if (resp.objects[index].did == device.did)
+                        {
+                            shareList.push(resp.objects[index]);
+
+                        }
+                    }
+                    updateList();
+                }
+            }
+        })
+        //测试
+       /* shareList.push(new ZADevice());
+        shareList.push(new ZADevice());
+        updateList();*/
+    }
+
+    function updateList() {
+        var finalHtml = "";
+        for (var index in shareList)
+        {
+            var insertHtml = "<div class='row bg-main'>"
+                +"<div class='row_wrapper_sharelist'>"
+                +"<span>"+shareList[index].dev_alias+"</span>"
+                +"<span>"+shareList[index].user_alias+"</span>"
+                +"<span class='font26   btn_normal_small_delete' id='delete_"+index+"'>删除</span>"
+                +"</div>"
+                + "</div>"
+                +"<div class='divider2'>"
+                +"</div>";
+            finalHtml = finalHtml + insertHtml;
+        }
+
+        if (shareList.length == 0) {
+            var desHtml = "<div class='row  margin-t344'>"
+                + "<div class='col-xs-12 tac'>"
+                + "<span class='yellow font23'>" + "尚无分享"
+                + "</span>"
+                + "</div>"
+                + "</div>";
+            finalHtml = finalHtml + desHtml;
+        }
+
+        $("#shareList").html(finalHtml);
+
+        for (var index in  shareList)
+        {
+            $("#delete_"+index).on("touchstart",function (evt) {
+                $(evt.currentTarget).removeClass("btn_normal_small_delete");
+                $(evt.currentTarget).addClass("btn_normal_large_delete_press");
+            })
+
+            $("#delete_"+index).on("touchend",function (evt) {
+                $(evt.currentTarget).removeClass("btn_normal_large_delete_press");
+                $(evt.currentTarget).addClass("btn_normal_small_delete");
+
+                net.cancleShare(shareList[index].id,function (status,resp) {
+                    if (status == true)
+                    {
+                        location.reload();
+                    }
+                })
+            })
+        }
+    }
+
+
+
+
+//    if ('ontouchstart' in window) {
+//        $(".w88").on("touchstart", sele1);
+//        $(".w88").on("touchend", sele2);
+//    } else {
+//        $(".w88").on("mousedown", sele1);
+//        $(".w88").on("mouseup", sele2);
+//    }
+//
+//    function sele1() {
+//        $(this).attr("src", "img/delete_press.png");
+//    }
+//
+//    function sele2() {
+//        $(this).attr("src", "img/delete_normal.png");
+//    }
+</script>
+</body>
+</html>

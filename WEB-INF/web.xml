@@ -1,0 +1,99 @@
+<!DOCTYPE web-app PUBLIC
+ "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+ "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+	<display-name>nvc_weixin</display-name>
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>nvc_weixin</param-value>
+	</context-param>
+
+	<filter>
+		<!-- The CORS filter with parameters -->
+		<filter-name>CORS</filter-name>
+		<filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+
+		<!-- Note: All parameters are options, if omitted the CORS Filter will 
+			fall back to the respective default values. -->
+		<init-param>
+			<param-name>cors.allowGenericHttpRequests</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>cors.allowOrigin</param-name>
+			<param-value>*</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>cors.allowSubdomains</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>cors.supportedMethods</param-name>
+			<param-value>GET, HEAD, POST, OPTIONS</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>cors.supportedHeaders</param-name>
+			<param-value>*</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>cors.supportsCredentials</param-name>
+			<param-value>true</param-value>
+		</init-param>
+
+		<init-param>
+			<param-name>cors.maxAge</param-name>
+			<param-value>3600</param-value>
+		</init-param>
+
+	</filter>
+
+	<filter-mapping>
+		<!-- CORS Filter mapping -->
+		<filter-name>CORS</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- log4jConfigLocation：log4j配置文件存放路径 -->
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:log4j.properties</param-value>
+	</context-param>
+	<servlet>
+		<servlet-name>freemarker</servlet-name>
+		<servlet-class>freemarker.ext.servlet.FreemarkerServlet</servlet-class>
+		<init-param>
+			<param-name>TemplatePath</param-name>
+			<param-value>/</param-value>
+		</init-param>
+		<init-param>
+			<param-name>NoCache</param-name>
+			<param-value>true</param-value>
+		</init-param>
+		<init-param>
+			<param-name>ContentType</param-name>
+			<param-value>text/html;charset=UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>template_update_delay</param-name>
+			<param-value>0</param-value>
+		</init-param>
+		<init-param>
+			<param-name>default_encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>number_format</param-name>
+			<param-value>0.##########</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>freemarker</servlet-name>
+		<url-pattern>*.html</url-pattern>
+	</servlet-mapping>
+</web-app>

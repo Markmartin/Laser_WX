@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>添加定时</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/weui.css">
+    <link rel="stylesheet" href="css/jquery-weui.css?1">
+</head>
+<body class="bg-body   ">
+<div class="container-fluid ">
+    <div class="divider1"></div>
+    <div class="row bg-main" id="enabled_onDiv">
+        <div class="col-xs-12 margin-tb38">
+            <span class="font26 white margin-l49">定时开启</span>
+            <img src="img/addTiming/time_off.png" class=" img-responsive  center-block pull-right margin-r49 w31 margin-t11" id="enabled_on"/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main" id="enabled_offDiv">
+        <div class="col-xs-12 margin-tb38">
+            <span class="font26 white margin-l49">定时关闭</span>
+            <img src="img/addTiming/time_on.png" class="  img-responsive  center-block pull-right margin-r49 w31 margin-t2" id="enabled_off"/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main">
+        <div class="col-xs-12    margin-t41  ">
+            <span class="font26 white margin-l49">选择时间</span>
+        </div>
+    </div>
+    <div class="row  bg-main  ">
+        <div class="col-xs-12       ">
+            <input class="weui-input dn" id="time-inline" type="text" value="">
+            <div id="time-container"></div>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main" onclick="gotoRepeat()">
+        <div class="col-xs-2   margin-t36  margin-b27">
+            <span class="font25 white   margin-l49   ">重复</span>
+        </div>
+        <div class="   pull-right     margin-t36  ">
+            <span class="font25 white    margin-r26  " id="repeatText">永不</span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49    margin-t13n"/>
+        </div>
+    </div>
+    <div class="row    margin-t72 margin-b47 tac">
+        <div class="col-xs-12       ">
+            <!--<img src="img/addTiming/wancheng.png" class="img-responsive center-block      w452  btn_large " id="finish"/>-->
+            <span class="   btn_highlight_large " id="finish">完成</span>
+        </div>
+    </div>
+    <div class="row     margin-b47 tac dn " id="delDiv">
+        <div class="col-xs-12       ">
+            <!--<img src="img/addTiming/delete.png" class="img-responsive center-block      w452    " id="delete"/>-->
+            <span class="   btn_normal_large " id="delete">删除</span>
+        </div>
+    </div>
+</div>
+<div class="weui-toast dn" id="loading">
+    <i class="weui-loading weui-icon_toast"></i>
+    <p class="weui-toast__content">加载中</p>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="js/jquery-weui.js"></script>
+<!--<script src="js/jquery.mobile-1.4.5.min.js"></script>-->
+<script src="js/gizwits_ws_0.3.0.min.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script>
+    $("#time-inline").picker({
+        container: '#time-container',
+        cols: [
+            {
+                textAlign: 'center',
+                values: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09',
+
+                    '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+                    '20', '21', '22', '23'
+                ]
+                //如果你希望显示文案和实际值不同，可以在这里加一个displayValues: [.....]
+            },
+            {
+                textAlign: 'center',
+                values: ['00', '01', '02', '03', '04', '05', '06', '07', '08', '09',
+
+                    '10', '11', '12', '13', '14', '15', '16', '17', '18', '19',
+                    '20', '21', '22', '23', '24', '25', '26', '27', '28', '29',
+                    '30', '31', '32', '33', '34', '35', '36', '37', '38', '39',
+                    '40', '41', '42', '43', '44', '45', '46', '47', '48', '49',
+                    '50', '51', '52', '53', '54', '55', '56', '57', '58', '59'
+                ]
+            }
+        ],
+        onChange: function (picker, values, displayValues) {
+//            console.log(values);
+            /*var time = $('#time-inline').val();
+             console.log("time"+time);
+             console.log("picker"+picker);
+             console.log("values"+values);
+             console.log("displayValues"+displayValues);*/
+        }
+    })
+    var zaDevice;
+
+    var device = $.cookie('ChilidDevice');
+    var device = localStorage.getItem('ChilidDevice');
+    zaDevice = new ZADevice(JSON.parse(device));
+
+
+
+
+
+
+        $("#enabled_onDiv").on("touchstart click", function () {
+            $("#enabled_on").attr("src", "img/addTiming/time_on.png");
+            $("#enabled_off").attr("src", "img/addTiming/time_off.png");
+        });
+        $("#enabled_offDiv").on("touchstart click", function () {
+            $("#enabled_on").attr("src", "img/addTiming/time_off.png");
+            $("#enabled_off").attr("src", "img/addTiming/time_on.png");
+        });
+
+
+
+
+    initData();
+
+    //完成按钮
+    $("#finish").click(function () {
+        //取重复
+//        var repeatVal = $.cookie('repeatVal');
+        var repeatVal = localStorage.getItem('repeatVal');
+
+        var repeat;
+        //取repeat
+        if (timing_type == "edit") {
+            var arr2 = timingItemObj.weekdayCN;
+            if (arr2 != undefined && arr2.length > 0) {
+                repeat = true;
+            } else {
+                repeat = false;
+            }
+        } else {
+            if (repeatVal != null && repeatVal != undefined && repeatVal != '' && repeatVal != 'null') {
+                repeat = true;
+            } else {
+                repeat = false;
+            }
+        }
+
+        console.log("repeat" + repeat);
+
+
+        // 取时间
+        var time = $('#time-inline').val();
+        console.log("time:" + time);
+        //分隔符是空格
+        var arr = time.split(' ');
+//        console.log(arr[0]);//小时如07
+//        console.log(arr[1]);//分钟如00
+        console.log("arr:" + arr);
+        var date = new Date();
+//        console.log(date);
+        date.setHours(arr[0]);
+//        console.log(date);
+        date.setMinutes(arr[1]);
+        console.log("时间" + date);
+        //取开关
+        var enabled = $("#enabled_on").attr("src") === "img/addTiming/time_on.png" ? true : false;
+        console.log("开关" + enabled);//如true
+
+        //取重复
+        console.log("添加的重复" + repeatVal);//
+
+
+        /**/
+
+
+        if (timing_type == "edit") {
+            var arr = new Array();
+            var arr2 = timingItemObj.weekdayCN;
+            if (arr2 != undefined && arr2.length > 0) {
+                for (var i = 0; i < arr2.length; i++) {
+                    if (arr2[i] == "周一") {
+                        arr.push(0);
+                    } else if (arr2[i] == "周二") {
+                        arr.push(1);
+                    } else if (arr2[i] == "周三") {
+                        arr.push(2);
+                    } else if (arr2[i] == "周四") {
+                        arr.push(3);
+                    } else if (arr2[i] == "周五") {
+                        arr.push(4);
+                    } else if (arr2[i] == "周六") {
+                        arr.push(5);
+                    } else if (arr2[i] == "周日") {
+                        arr.push(6);
+                    }
+                }
+            }
+            console.log("修改的重复" + arr);//
+            //TODO
+            $("#loading").fadeIn();
+            zaDevice.changeTimerState(timingItemObj.id, repeat, true, enabled, date, cb, arr);
+        } else {
+            //TODO
+            $("#loading").fadeIn();
+            zaDevice.setTimer(repeat, date, enabled, cb, repeatVal.split(","));
+        }
+        setTimeout(function () {
+            $("#loading").fadeOut();
+        }, 5 * 1000)
+
+    });
+    var timing_type;
+    var timingItemObj;
+    function initData() {
+
+
+        var timing_enabled;
+        var timing_picker;
+        var repeatText;
+        //修改定时  ，初始化数据改变
+        timing_type = $.cookie('timing_type');
+        timing_type = localStorage.getItem('timing_type');
+
+        console.log(timing_type);//
+        if (timing_type == "edit") {
+
+            $("title").html("修改定时");
+            $("#delDiv").removeClass("dn");
+
+
+//            var timingItemObjStr = $.cookie('timingItemObj');
+            var timingItemObjStr = localStorage.getItem('timingItemObj')
+            console.log(timingItemObjStr);//
+            timingItemObj = JSON.parse(timingItemObjStr);
+            console.log(timingItemObj);//
+
+        }
+        if (timing_type == "edit") {
+            if (timingItemObj.timerEvent == "开启") {
+                timing_enabled = "true";
+            } else {
+                timing_enabled = "false";
+            }
+
+        } else {
+
+//            timing_enabled = $.cookie('timing_enabled');
+            timing_enabled = localStorage.getItem('timing_enabled');
+        }
+
+
+        console.log(timing_enabled);//
+        if (timing_enabled != null && timing_enabled != undefined && timing_enabled != '' && timing_enabled != 'null') {
+
+            if (timing_enabled == "true") {
+                $("#enabled_on").attr("src", "img/addTiming/time_on.png");
+                $("#enabled_off").attr("src", "img/addTiming/time_off.png");
+            } else {
+                $("#enabled_on").attr("src", "img/addTiming/time_off.png");
+                $("#enabled_off").attr("src", "img/addTiming/time_on.png");
+            }
+        }
+
+
+        if (timing_type == "edit") {
+            timing_picker = timingItemObj.localTime.split(":");
+        } else {
+            //TODO
+
+//            timing_picker = $.cookie('timing_picker').split(",");
+            timing_picker = localStorage.getItem('timing_picker').split(",");
+            console.log("timing_picker" + timing_picker);
+
+        }
+
+
+        console.log(timing_picker);//
+        if (timing_picker != null && timing_picker != undefined && timing_picker != '' && timing_picker != 'null') {
+            console.log("timing_picker" + timing_picker);
+            $("#time-inline").picker("setValue", timing_picker);
+        }
+
+
+        if (timing_type == "edit") {
+
+            var arr2 = timingItemObj.weekdayCN;
+            if (arr2 != undefined && arr2.length > 0) {
+                repeatText = timingItemObj.weekdayCN;
+                console.log("length" + arr2.length);//
+            } else {
+                repeatText = "";
+
+            }
+        } else {
+//            repeatText = $.cookie('repeatText');
+            repeatText = localStorage.getItem('repeatText');
+        }
+
+
+
+        console.log("repeatText" + repeatText + "0");//
+        if (repeatText != null && repeatText != undefined && repeatText != '' && repeatText != 'null') {
+            $("#repeatText").text("每" + repeatText);
+        } else {
+            $("#repeatText").text("永不");
+        }
+
+    }
+
+
+    function gotoRepeat() {
+
+
+        if (timing_type == "edit") {
+            //存开关
+            if ($("#enabled_on").attr("src") === "img/addTiming/time_on.png") {
+                timingItemObj.timerEvent = "开启"
+
+            } else {
+                timingItemObj.timerEvent = "关闭"
+            }
+
+            //存时间
+            var time = $('#time-inline').val();
+            //分隔符是空格
+            var arr = time.split(' ');
+            timingItemObj.timingItemObj = arr.join(":");
+
+            localStorage.setItem('timingItemObj',JSON.stringify(timingItemObj));
+            $.cookie('timingItemObj', JSON.stringify(timingItemObj));
+
+        } else {
+            //存开关
+            $.cookie('timing_enabled', $("#enabled_on").attr("src") === "img/addTiming/time_on.png" ? true : false);
+            localStorage.setItem('timing_enabled',JSON.stringify(timingItemObj));
+            //存时间
+            var time = $('#time-inline').val();
+            //分隔符是空格
+            var arr = time.split(' ');
+
+            $.cookie('timing_picker', arr);
+        }
+
+
+        $(location).attr("href", "timingRepeat.html");
+    }
+
+
+    $("#delete").click(function () {
+        $("#loading").fadeIn();
+        zaDevice.deleteTimer(timingItemObj.id, cb);
+        setTimeout(function () {
+            $("#loading").fadeOut();
+        }, 5 * 1000)
+
+    });
+
+
+    var cb = function (data, result) {
+//            console.log('页面回调'+data);
+        $("#loading").fadeOut();
+        if (data == true) {
+
+            console.log('页面回调' + JSON.stringify(result));
+            //TODO
+            $(location).attr("href", "timingList.html");
+        } else {
+            console.log('出错啦' + result);
+//            alert('出错啦:' + result);
+            //TODO
+            $(location).attr("href", "timingList.html");
+        }
+
+    };
+</script>
+</body>
+</html>

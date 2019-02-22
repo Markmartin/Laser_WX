@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta http-equiv="Access-Control-Allow-Origin" content="*">-->
+    <!-- <meta name="viewport"
+           content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>选择房间</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid">
+    <div class="divider1"></div>
+    <div class="row">
+        <div class="col-xs-12  ">
+            <span class="font26 gray  margin-l48  line-h82">选择房间</span>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="bg-main">
+        <div id="deviceList"></div>
+        <!--<div class="row">-->
+            <!--<div class="col-xs-12  ">-->
+                <!--<span class="font26 white margin-l48 line-h104">客厅</span>-->
+                <!--<img src="img/addTiming/time_on.png" class=" img-responsive  center-block pull-right margin-r48 w31  di margin-t38 "/>-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<div class="divider1"></div>-->
+        <!--<div class="row">-->
+            <!--<div class="col-xs-12  ">-->
+                <!--<span class="font26 white margin-l48 line-h104">卧室</span>-->
+                <!--<img src="img/addTiming/time_off.png" class=" img-responsive  center-block pull-right margin-r48 w31  di margin-t38"/>-->
+            <!--</div>-->
+        <!--</div>-->
+        <!--<div class="divider1"></div>-->
+    </div>
+    <div class="row margin-t75">
+        <div class="col-xs-12 tac" onclick="finishEvent()">
+            <span class="btn_highlight_large " >完成</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/Scene.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+
+<script>
+    var childDevice;
+    var net;
+    var sceneList = new Array();
+    var selsecSceneList = new Array()
+    var selectStatus = new Array();
+
+    function loadPage() {
+        var device = localStorage.getItem('ChilidDevice');
+        childDevice = new ZADevice(JSON.parse(device));
+
+        net = new Net();
+
+        Scene.getSceneList(function (status, result) {
+            if (status == true) {
+                sceneList.splice(0, sceneList.length);
+                sceneList = result;
+                net.querySceneByDid(childDevice.did,function (status,resp) {
+                    if (status == true)
+                    {
+                        selsecSceneList = resp ;
+                        updateStatus();
+                    }
+                })
+            }
+        });
+    }
+
+    function updateStatus() {
+        for (var sceneIndex in sceneList)
+        {
+            var sceneID = sceneList[sceneIndex].sceneId;
+            var has = false ;
+            for (var index in selsecSceneList)
+            {
+                if (selsecSceneList[index].sceneId == sceneID)
+                {
+                    has = true ;
+                    break;
+                }
+            }
+
+            selectStatus.push({"status":has});
+        }
+        updateSceneList();
+    }
+
+    function updateSceneList() {
+        var listHtml = "";
+        for (var index in sceneList)
+        {
+            var selectPath = selectStatus[index].status == true ? "img/addTiming/time_on.png" : "img/addTiming/time_off.png"
+            var insetHtml = "<div class='row'>"
+                +"<div class='col-xs-12' onclick='selectRoom("+index+")'>"
+                +"<span class='font26 white margin-l48 line-h104'>"+sceneList[index].sceneName+"</span>"
+                +"<img src='"+selectPath+"' class='img-responsive  center-block pull-right margin-r48 w31  di margin-t38' id='selectImage_"+index+"'/>"
+                +"</div>"
+                +"</div>"
+                +"<div class='divider1'>"
+                +"</div>";
+            listHtml = listHtml + insetHtml;
+        }
+        $("#deviceList").html(listHtml);
+    }
+
+    function selectRoom(index) {
+        if (selectStatus[index].status == true)
+        {
+            selectStatus[index].status = false;
+            $("#selectImage_"+index).attr("src","img/addTiming/time_off.png");
+            net.deleteSceneByDid(sceneList[index].sceneId,childDevice.did,function (status,resp) {
+                console.log("xxx");
+            });
+        }
+        else
+        {
+            selectStatus[index].status = true;
+            $("#selectImage_"+index).attr("src","img/addTiming/time_on.png");
+            net.updateSceneByDid(sceneList[index].sceneId,childDevice.did,function (status,resp) {
+                console.log("xxx");
+            })
+        }
+    }
+
+    function finishEvent() {
+        history.back();
+
+    }
+</script>
+</body>
+</html>

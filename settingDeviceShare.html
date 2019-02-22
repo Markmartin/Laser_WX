@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- <meta name="viewport"
+           content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>设备分享</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid  ">
+    <div class="divider1"></div>
+    <div class="row">
+        <div class="col-xs-12 margin-t175   h260 tac   " id="qrcodeCustom">
+            <!--<img src="img/deviceShare/share_erweima.png" class="img-responsive center-block       w261"/>-->
+        </div>
+    </div>
+    <div class="row  margin-t57">
+        <div class="col-xs-12  tac">
+            <span class="font26 orange" id="des">扫描二维码，分享设备权限</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.qrcode.js"></script>
+<script src="js/utf.js"></script>
+<script src="device_js/utils.js"></script>
+<script>
+
+
+    console.log($('#qrcodeCustom').height());
+
+    function loadPage() {
+        var qrCode = localStorage.getItem("qrCode");
+
+        $("title").html("分享");
+        $("#des").html("扫描二维码即可分享");
+
+        $('#qrcodeCustom').qrcode({
+            render: "canvas",
+            text: qrCode,
+            width: $('#qrcodeCustom').height(),               //二维码的宽度
+            height: $('#qrcodeCustom').height(),              //二维码的高度
+            background: "#ffffff",       //二维码的后景色
+            foreground: "#000000",        //二维码的前景色
+//        src: 'img/1.jpg'             //二维码中间的图片
+        });
+        $('#qrcodeCustom canvas').addClass(" ");
+    }
+
+
+
+</script>
+</body>
+</html>

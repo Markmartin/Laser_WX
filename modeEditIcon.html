@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>修改图标</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body  padding-b88" onpageshow="loadPage()">
+<div class="container-fluid">
+    <div class="divider1"></div>
+    <div class=" bg-main" id="radio">
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb32  taj ">
+                <img src="img/model_icon/model_0_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/model_icon/model_1_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/model_icon/model_2_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/model_icon/model_3_off.png" class="img-responsive  center-block   w108  di       "/>&nbsp;
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb32  taj ">
+                <img src="img/model_icon/model_4_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/model_icon/model_5_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/model_icon/model_6_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/model_icon/model_7_off.png" class="img-responsive  center-block   w108  di      "/>&nbsp;
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb32  taj ">
+                <img src="img/model_icon/model_8_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/model_icon/model_9_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/model_icon/model_10_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/model_icon/model_11_off.png" class="img-responsive  center-block   w108  di      "/>&nbsp;
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb32  taj ">
+                <img src="img/model_icon/model_12_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/model_icon/model_13_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/model_icon/model_14_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/model_icon/model_15_off.png" class="img-responsive  center-block   w108  di      "/>&nbsp;
+            </div>
+        </div>
+    </div>
+    <div class="row     margin-t75">
+        <div class="col-xs-12  tac  " onclick="finish()">
+            <!--      <a href="sceneAddStep2.html">
+                      <img src="./img/addTiming/wancheng.png" class="img-responsive center-block      w452   "/>-->
+            <span class="   btn_highlight_large ">完成</span>
+            <!--</a>-->
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script>
+    var model;
+    function loadPage() {
+        model = new Mode(undefined, getQueryString("modelID"), function (status) {
+            if (status == true) {
+                initData();
+            }
+        })
+    }
+    //按下效果
+    /* changeColor(".w108")
+     function changeColor(id) {
+     $(id).on("touchstart", function () {
+     $(this).attr("src", $(this).attr("src").replace('_off', '_on'));
+     })
+     $(id).on("touchend", function () {
+     $(this).attr("src", $(this).attr("src").replace('_on', '_off'));
+     })
+     }*/
+
+
+    //单选效果
+    /*radio("#radio");
+     function radio(id) {
+     $(id).find('img').each(function () {
+     $(this).click(function () {
+     $(this).attr("src", $(this).attr("src").replace('_off','_on')  );
+     var sib= $(this).siblings(".on");
+     sib.attr("src", $(sib).attr("src").replace('_on','_off')  );
+     $(this).addClass("on");
+     $(this).siblings(".on").removeClass("on");
+     });
+     })
+     }*/
+
+
+    function initData() {
+        console.log("mode.modeIcon" + model.modeIcon);
+
+        var index = model.modeIcon.match(/\_(\d+)/);
+        console.log(index[1]);
+        $(".w108").eq(index[1]).attr("src", "img/model_icon/" + model.modeIcon + "_on.png").addClass("on");
+    }
+
+    radio("#radio img");
+    function radio(id) {
+        $(id).each(function () {
+
+            if ('ontouchstart' in window) {
+                $(this).on("touchstart", select);
+            } else {
+                $(this).on("click", select);
+            }
+
+        })
+    }
+
+    function select() {
+        $(this).attr("src", $(this).attr("src").replace('_off', '_on'));
+        $(this).addClass("on");
+
+        var sib = $(this).siblings(".on");
+        console.log("sib" + sib);
+        console.log("sib" + JSON.stringify(sib));
+        if ($(sib).attr("src") != undefined) {
+            console.log("sib" + $(sib).attr("src"));
+            sib.attr("src", $(sib).attr("src").replace('_on', '_off'));
+            sib.removeClass("on");
+        }
+        var psib = $(this).parent().parent().siblings().find(".on");
+        console.log(psib);
+        if ($(psib).attr("src") != undefined) {
+            psib.attr("src", $(psib).attr("src").replace('_on', '_off'));
+            psib.removeClass("on");
+        }
+    }
+    function finish() {
+
+        var index = -1;
+        $(".w108").each(function () {
+//        console.log($(this).attr("src"));
+
+            if ($(this).attr("src").indexOf("_on") != -1) {
+                index = $(".w108").index(this);
+                console.log("index" + index);
+            }
+        })
+        if (index == -1) {
+            alert("请选择图标");
+            return;
+        }
+        var icon_url = "model_" + index;
+
+
+        model.updateIcon(icon_url, function (success, data) {
+            console.log('data：' + JSON.stringify(data));
+            model.modeIcon = icon_url;
+            history.back();
+        });
+    }
+</script>
+</body>
+</html>

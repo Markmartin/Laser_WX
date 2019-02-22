@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>添加场景</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid  ">
+    <div class="divider1"></div>
+    <div class="row  margin-tb20  ">
+        <div class="col-xs-10">
+            <span class="font23     margin-l49   white">快捷模式</span>
+        </div>
+    </div>
+    <div id="defaultModelList"></div>
+    <div class="row    ">
+        <div class="col-xs-12      margin-t75   tac">
+            <a href="scene.html">
+                <!--<img src="img/roomAdd/room_finish.png" class="img-responsive center-block   w452     "/>-->
+                <span class="   btn_highlight_large ">完成</span>
+            </a>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+<script type="text/javascript">
+    var scene;
+    var sceneModelList
+    function loadPage() {
+        var sceneID = getQueryString("sceneID");
+        scene = new Scene(undefined, getQueryString("sceneID"), function (status) {
+            if (status == true) {
+                document.title = scene.sceneName;
+                updatePage();
+            }
+        })
+
+//        sceneModelList = Mode.getDefaultModelList();
+        sceneModelList = Mode.defaultModelLsitOfType(defaultModelType.all);
+        updatePage();
+
+    }
+
+
+    function refreshScene() {
+        scene.refreshScene(function (status) {
+            if (status == true) {
+                updatePage();
+            }
+        })
+    }
+
+    function updatePage() {
+        var modelListHtml = "";
+        for (var i = 0; i < 8; i++) {
+            var insertHtml = "";
+            if (i % 4 == 0) {
+                var cellHtml = "";
+                cellHtml = cellHtml + "<div class='row bg-main padding-lr45'><div class='col-xs-12 margin-tb32  taj'>"
+                insertHtml = insertHtml + cellHtml;
+            }
+
+
+            var onORoff = scene.inDefaultModel(sceneModelList[i]) ? "_on" : "_off";
+            var imgPath = "img/model_icon/" + sceneModelList[i].modeIcon + onORoff + ".png";
+
+//            insertHtml = insertHtml + "<img src='"+imgPath+"' class='img-responsive center-block w108 di' onclick='DefaultModelEvent("+i+")' id='scene_"+i+"'/>&nbsp";
+            insertHtml = insertHtml + "<div class='w108div  dib tac' onclick='DefaultModelEvent(" + i + ")'>"
+                + "<img src='" + imgPath + "' class='img-responsive center-block  w108 '/>"
+                + "<span class='font22  gray padding-t20  db ofh line-h22'>" + sceneModelList[i].modeName + "</span>"
+                + "</div>&nbsp;";
+
+            if (i % 4 == 3) {
+                insertHtml = insertHtml + "</div></div>";
+            }
+
+            modelListHtml = modelListHtml + insertHtml;
+        }
+
+        if (sceneModelList.length % 4 != 0) {
+            var cover = sceneModelList.length % 4;
+            var rest = 4 - cover;
+            for (var index = 0; index < rest; index++) {
+                var insertHtml = "<img src='img/model_icon/model_0_off.png' class='img-responsive center-block   w108   di  vh'/>&nbsp";
+                modelListHtml = modelListHtml + insertHtml;
+            }
+            modelListHtml = modelListHtml + "</div></div>";
+        }
+        $("#defaultModelList").html(modelListHtml);
+    }
+
+    function DefaultModelEvent(modelIndex) {
+
+        if (scene.inDefaultModel(sceneModelList[modelIndex]) == true) {
+            $("#scene_" + modelIndex).attr("src", "img/model_icon/" + sceneModelList[modelIndex].modeIcon + ".png");
+            sceneModelList[modelIndex].deleteModel(function (status, result) {
+                refreshScene();
+            })
+        }
+        else {
+            $("#scene_" + modelIndex).attr("src", "img/model_icon/" + sceneModelList[modelIndex].modeIcon + "_on" + ".png");
+            scene.addDefaultModel(sceneModelList[modelIndex], function (status, result) {
+                refreshScene();
+            })
+        }
+    }
+
+    function GetJsonData() {
+        var arr = new Array();
+        for (var i; i < $(".onjob-lsit tr").length; i++) {
+            var modes = {
+                /* "modeName": "晚上",
+                 "modeIcon":"aaas",
+                 "modeStatus":  "设备状态json",
+                 "modeTimer": "设备定时ID",*/
+                "modeName": $(".modeName").eq(i).text(),
+                "modeIcon": $(".modeIcon").eq(i).text(),
+                "modeStatus": $(".modeStatus").eq(i).text(),
+                "modeTimer": $(".modeTimer").eq(i).text(),
+
+            };
+            arr.push(modes);
+        }
+        var json = {
+            /*"sceneName": "灯光",
+             "delayClose": 1,
+             "openid":  "yy",
+             "dids": "safsf,asfdsf,dfadfs,fasdfas,fasfda,fafa", */
+            "sceneName": $(".sceneName").text(),
+            "delayClose": parseInt($(".delayClose").text()),
+            "openid": $(".openid").text(),
+            "dids": $(".dids").text(),
+            "modes": arr,
+        };
+        return json;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--   <meta name="viewport"
+             content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>所属场景</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body   ">
+<div class="container-fluid ">
+    <div class="divider2"></div>
+    <div class="row   padding-lr48 belong">
+        <div class="col-xs-12 margin-t74  taj ">
+            <span class="   btn_normal ">客厅</span>
+            <span class="  btn_normal ">主卧</span>
+            <span class="  btn_normal">我的次卧啊啊啊</span>
+        </div>
+        <div class="col-xs-12 margin-t74  taj ">
+            <span class="   btn_highlight ">我的次卧啊的</span>
+            <span class="  btn_normal ">主卧</span>
+            <span class="  btn_normal">客厅</span>
+        </div>
+    </div>
+    <div class="row  margin-t90  " onclick="document.location=' device640.html'">
+        <div class="col-xs-12   tac ">
+            <!--<img src="img/addTiming/wancheng.png" class="img-responsive center-block   w452 btn_large    "/>-->
+            <span class="   btn_highlight_large ">完成</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script type="text/javascript">
+
+
+
+
+
+    $(".belong").find('span').each(function () {
+
+        if ('ontouchstart' in window) {
+            $(this).on("touchstart", select);
+        } else {
+            $(this).on("click", select);
+        }
+
+    })
+
+    function select() {
+        $(this).addClass("btn_highlight").removeClass('btn_normal');
+        $(this).siblings(".btn_highlight").removeClass("btn_highlight").addClass("btn_normal");
+        $(this).parent().siblings().find(".btn_highlight").removeClass("btn_highlight").addClass("btn_normal");
+    }
+</script>
+</body>
+</html>

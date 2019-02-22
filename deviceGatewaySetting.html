@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--    <meta name="viewport"
+              content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>网关设置</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid ">
+    <div class="divider1"></div>
+
+    <div class="row bg-main">
+        <div class="col-xs-12 margin-tb35" onclick="jumpToUpdateName()">
+            <!--<span class="font26 white margin-l49 line-h30">网关名称</span>-->
+            <!--<span class="font24 white margin-r56">往光明</span>-->
+            <!--<img src="img/setting/setting_more.png" class="img-responsive center-block pull-right     w19   margin-r49    "/>-->
+            <div class="col-xs-6">
+                <span class="font26 white margin-l49">网关名称</span>
+            </div>
+            <div class="pull-right">
+                <span class="font26 white   margin-r22" id="gatewayName"></span>
+                <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49  margin-t13n  "/>
+            </div>
+        </div>
+    </div>
+    <div class="divider1"></div>
+
+    <div class="row bg-main dn" id="share">
+        <div class="col-xs-12 margin-tb35" onclick="jumpToQrcode()">
+            <span class="font26 white margin-l49 line-h30">分享我的网关</span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block pull-right     w19   margin-r49    "/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+
+    <div class="row bg-main dn" id="shareList">
+        <div class="col-xs-12 margin-tb35" onclick="jumpToShareList()">
+            <span class="font26 white margin-l49 line-h30">分享网关列表</span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block pull-right     w19   margin-r49    "/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+
+    <div class="row     margin-t72 "  >
+        <div class="col-xs-12   tac">
+            <span class="   btn_normal_large " onclick="deleteGateway()">删除</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/ShareManager.js"></script>
+<script>
+
+    var gatewatDevice;
+    function loadPage() {
+        gatewatDevice = new  ZADevice(JSON.parse(localStorage.getItem("GatewayDevice")));
+        $("#gatewayName").text(gatewatDevice.dev_alias);
+        if (gatewatDevice.getHasShareRole())
+        {
+            $("#share").removeClass("dn");
+            $("#shareList").removeClass("dn");
+        }
+    }
+
+    function jumpToUpdateName() {
+        $(location).attr("href","EditDeviceName.html?type=GatewayDevice");
+    }
+    
+    function jumpToQrcode() {
+        ShareManager.shareDeviceQRCode(gatewatDevice.did,function (status,resp) {
+            if (status == true)
+            {
+                localStorage.setItem("qrCode",resp)
+                $(location).attr("href","settingDeviceShare.html");
+            }
+        })
+    }
+
+    function jumpToShareList() {
+        $(location).attr("href","shareList.html?type=GatewayDevice");
+    }
+
+    function deleteGateway() {
+        //删除网关设备
+        var net = new Net();
+//        net.unBindDevice(gatewatDevice.did,function (status,resp) {
+//            if (status == true)
+//            {
+//                history.back();
+//            }
+//            else
+//            {
+//                alert("删除网关设备失败");
+//            }
+//        });
+        net.deleteGatewayDevice(gatewatDevice.mac,gatewatDevice.did,function (status,resp) {
+            if (status == true)
+            {
+                history.back();
+            }else {
+                alert("删除网关设备失败");
+            }
+        })
+//        gatewatDevice.unBindDevice(gate)
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--    <meta name="viewport"
+              content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>添加模式</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body  padding-b88">
+<div class="container-fluid  ">
+    <div class="divider1"></div>
+    <div class="row     ">
+        <div class="col-xs-12 margin-tb51    ">
+            <input type="text" placeholder="模式名称" class="input-lg bg-main  center-block   white  w543 font26" id="modeName">
+        </div>
+    </div>
+    <div class="  bg-main    " id="radio">
+        <div class="row    ">
+            <div class="col-xs-12     margin-t30  ">
+                <span class="font26     margin-l49   white">选择图标</span>
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb16  taj ">
+                <img src="img/modelAdd/huike_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/modelAdd/richang_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/modelAdd/guanying_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/modelAdd/yedeng_off.png" class="img-responsive center-block   w108      di  "/>&nbsp;
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb16  taj ">
+                <img src="img/modelAdd/jucan_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/modelAdd/zhumian_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/modelAdd/langman_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/modelAdd/mingliang_off.png" class="img-responsive  center-block   w108  di    "/>&nbsp;
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb16  taj ">
+                <img src="img/model_icon/model_8_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/model_icon/model_9_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/model_icon/model_10_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/model_icon/model_11_off.png" class="img-responsive  center-block   w108  di      "/>&nbsp;
+            </div>
+        </div>
+        <div class="row bg-main padding-lr45 ">
+            <div class="col-xs-12 margin-tb16  taj ">
+                <img src="img/model_icon/model_12_off.png" class="img-responsive center-block  w108    di    "/>&nbsp;
+                <img src="img/model_icon/model_13_off.png" class="img-responsive center-block    w108  di   "/>&nbsp;
+                <img src="img/model_icon/model_14_off.png" class="img-responsive center-block   w108   di   "/>&nbsp;
+                <img src="img/model_icon/model_15_off.png" class="img-responsive  center-block   w108  di      "/>&nbsp;
+            </div>
+        </div>
+    </div>
+    <div class="row    margin-t72">
+        <div class="col-xs-12  tac">
+            <span class="   btn_highlight_large " onclick="finish()">完成并编辑</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+<script>
+    /*    var scene =  $.cookie("scene") ;
+     console.log(scene);*/
+    /* var scene = JSON.stringify($.cookie("scene"));
+     console.log(scene);*/
+
+    var scene;
+
+    $(document).ready(function () {
+        scene = new Scene(undefined, getQueryString("sceneID"), function (status) {
+            if (status == true) {
+            }
+        })
+
+    })
+
+
+    radio("#radio img");
+    function radio(id) {
+        $(id).each(function () {
+            if ('ontouchstart' in window) {
+                $(this).on("touchstart", select);
+            } else {
+                $(this).on("click", select);
+            }
+        })
+    }
+
+    function select() {
+        $(this).attr("src", $(this).attr("src").replace('_off', '_on'));
+        $(this).addClass("on");
+
+        var sib = $(this).siblings(".on");
+        console.log("sib" + sib);
+        console.log("sib" + JSON.stringify(sib));
+        if ($(sib).attr("src") != undefined) {
+            console.log("sib" + $(sib).attr("src"));
+            sib.attr("src", $(sib).attr("src").replace('_on', '_off'));
+            sib.removeClass("on");
+        }
+        var psib = $(this).parent().parent().siblings().find(".on");
+        console.log(psib);
+        if ($(psib).attr("src") != undefined) {
+            psib.attr("src", $(psib).attr("src").replace('_on', '_off'));
+            psib.removeClass("on");
+        }
+    }
+
+    function finish() {
+
+        var modeName = $("#modeName").val();
+        if (modeName == "") {
+            alert("请输入名称");
+            return;
+        }
+
+        console.log("modeName" + modeName);
+        var index = -1;
+        $(".w108").each(function () {
+//        console.log($(this).attr("src"));
+
+            if ($(this).attr("src").indexOf("_on") != -1) {
+                index = $(".w108").index(this);
+                console.log("index" + index);
+            }
+        })
+        if (index == -1) {
+            alert("请选择图标");
+            return;
+        }
+        var icon_url = "model_" + index;
+
+        scene.addCustomModel(modeName, icon_url, function (success, data) {
+//            console.log(data);
+//            $.cookie("mode",JSON.stringify(data));
+            $(location).attr("href", "modelEdit.html?modelID=" + data.modeId);
+        });
+    }
+</script>
+</body>
+</html>

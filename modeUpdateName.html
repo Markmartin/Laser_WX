@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- <meta name="viewport"
+           content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>修改名称</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid  ">
+    <div class="divider1"></div>
+    <div class="row     ">
+        <div class="col-xs-12 margin-t51    ">
+            <input type="text" placeholder="请输入模式名称" class="  input-lg bg-main center-block    white w543" id="modeName">
+        </div>
+    </div>
+    <div class="row    margin-t75">
+        <div class="col-xs-12  tac  " onclick="finish()">
+            <!--  <a href="sceneAddStep2.html">
+                  <img src="img/addTiming/wancheng.png" class="img-responsive center-block   w452     "/>
+              </a>-->
+            <span class="   btn_highlight_large ">完成</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script>
+
+    var model;
+    function loadPage() {
+        model = new Mode(undefined, getQueryString("modelID"), function (status) {
+            if (status == true) {
+                initData();
+            }
+        })
+    }
+
+    function initData() {
+        console.log("mode.modeName" + model.modeName);
+        $("#modeName").val(model.modeName);
+    }
+
+    function finish() {
+
+        var modeName = $("#modeName").val();
+        if (modeName == "") {
+            alert("请输入名称");
+            return;
+        }
+
+        if (modeName.length > 5)
+        {
+            alert("模式名称不得超过5个字");
+            return;
+        }
+
+        model.updateName(modeName, function (success, data) {
+            console.log('data：' + JSON.stringify(data));
+//            self.location = document.referrer;
+
+             history.back()
+        });
+    }
+</script>
+</body>
+</html>

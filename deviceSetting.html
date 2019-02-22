@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--   <meta name="viewport"
+             content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>灯具设置</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+    <link href="css/weui.css" rel="stylesheet">
+</head>
+<body class="bg-body " onpageshow="loadPage()">
+<div class="container-fluid ">
+    <div class="divider2"></div>
+    <div class="row bg-main  ">
+        <div class="col-xs-12 margin-t33 margin-b28" onclick="jumpToUpdateName()">
+            <span class="font26 white margin-l49">修改灯具名称</span>
+            <span class="font26 white pull-right margin-r49" id="deviceName">灯1</span>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main" onclick="jumpToSelRoom()">
+        <div class="col-xs-4 margin-t33 margin-b28">
+            <span class="font26 white   margin-l49">选择房间</span>
+        </div>
+        <div class="pull-right margin-t36">
+            <span class="font26 white  margin-r26" id="place"></span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block di w19 margin-r49 margin-t13n "/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main    ">
+        <div class="col-xs-12 margin-t33 margin-b28">
+            <span class="font26 white   margin-l49  ">识别码</span>
+            <span class="font26 white   pull-right  margin-r49" id="macAddress"></span>
+        </div>
+    </div>
+    <div class="divider1"></div>
+
+    <div class="dn" id="share">
+        <div class="row bg-main" onclick="jumpToQrcode()">
+            <div class=" margin-t33 margin-b28">
+                <span class="font26 white   margin-l49  ">分享我的灯具</span>
+            </div>
+        </div>
+        <div class="divider1"></div>
+        <div class="row bg-main" onclick="jumpToShareList()">
+            <div class=" margin-t33 margin-b28">
+                <span class="font26 white   margin-l49  ">分享灯具列表</span>
+            </div>
+        </div>
+        <div class="divider1"></div>
+    </div>
+
+
+    <div class="row  margin-t65" >
+        <div class="col-xs-12 tac" onclick="deleteChildrenDevice()">
+            <!--<img src="img/deviceSetting/shanchudengju.png" class="img-responsive center-block  w452 btn_large"/>-->
+            <span class="   btn_normal_large ">删除灯具</span>
+        </div>
+    </div>
+</div>
+
+<div class="weui-toast" id="loading">
+    <i class="weui-loading weui-icon_toast"></i>
+    <p class="weui-toast__content">灯具解绑中</p>
+</div>
+
+<div class="weui-toast" id="tipMessage">
+    <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+    <p class="weui-toast__content">灯具解绑成功</p>
+</div>
+
+<div class="dn">
+    <span id="openid">${openid}</span>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/websocket.js"></script>
+<script src="device_js/websocket_instance.js"></script>
+<script src="device_js/ShareManager.js"></script>
+<script type="text/javascript">
+    var childDevice;
+
+    function loadPage() {
+        var device = localStorage.getItem('ChilidDevice');
+        childDevice = new ZADevice(JSON.parse(device));
+
+        if (childDevice.getHasShareRole())
+        {
+            $("#share").removeClass("dn");
+        }
+//        var net = new Net();
+//        net.querySceneByDid(childDevice.did,function (status,resp) {
+//            for (var  index in resp)
+//            {
+//                if (resp[index].isDefault == 1)
+//                {
+//                    $("#place").text(resp[index].sceneName);
+//                }
+//            }
+//
+//        })
+        console.log("设备别名****" + childDevice.dev_alias + "\n" + "设备房间****" + childDevice.room + "\n" + "设备Mac****" + childDevice.mac);
+        $("#deviceName").text(childDevice.dev_alias);
+        $("#place").text(childDevice.room);
+        $("#macAddress").text(childDevice.mac);
+        $(".weui-toast").hide();
+    }
+    
+    function jumpToUpdateName() {
+        $(location).attr("href","EditDeviceName.html?type=ChilidDevice");
+    }
+
+    function jumpToSelRoom() {
+        //TODO
+        $(location).attr("href","deviceSettingSelRoom.html");
+    }
+
+    function deleteChildrenDevice() {
+      $("#loading>p").text("灯具解绑中");
+      $("#loading").fadeIn();
+
+      var gatewayDevice  = new ZADevice(childDevice.gatewayDevice) ;
+        gatewayDevice.deleteChildDevice(childDevice.sdid, childDevice.did, function (status) {
+            console.log('设备删除回调：' + status);
+            if (status == true) {
+                $("#loading").fadeOut();
+                $("#tipMessage>p").text("灯具解绑成功");
+                $("#tipMessage").fadeIn();
+                setTimeout(function () {
+                    $("#tipMessage").fadeOut("normal",function () {
+                        history.back();
+                        // self.location=document.referrer;
+                        // window.location.href=document.referrer;
+                    })
+                },1500);
+            } else {
+                $("#loading>p").text("灯具解绑失败");
+                setTimeout(function () {
+                    $("#loading").fadeOut();
+                },500)
+            }
+        })
+        setTimeout(function () {
+            $("#loading>p").text("灯具解绑超时");
+            setTimeout(function () {
+                $("#loading").fadeOut();
+                    // self.location=document.referrer;
+            },500)
+        },15000);
+    }
+
+    function jumpToQrcode() {
+        ShareManager.shareDeviceQRCode(childDevice.did,function (status,resp) {
+            if (status == true)
+            {
+                resp = resp + "||&did=" + childDevice.gatewayDevice.did + "&other";
+                localStorage.setItem("qrCode",resp);
+                $(location).attr("href","settingDeviceShare.html");
+            }
+        })
+    }
+
+    function jumpToShareList() {
+        $(location).attr("href","shareList.html?type=ChilidDevice");
+    }
+
+</script>
+
+
+</body>
+</html>

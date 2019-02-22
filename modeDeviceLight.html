@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--    <meta name="viewport"
+              content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>调光灯</title>
+    <script src="js/flexible.js"></script>
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+    <link href="css/bootstrap-slider.css" rel="stylesheet">
+</head>
+<body class="bg-main" onpageshow="loadPage()">
+<div class="container-fluid   padding-b250">
+    <div class="divider1"></div>
+    <div class="row bg-main  margin-t40 margin-b34 ">
+        <div class="col-xs-6   margin-l49 ">
+            <span class="font25 white  ">开关</span>
+        </div>
+        <div class="col-xs-4   pull-right">
+            <img src="img/equipment_open.png" class=" img-responsive  center-block pull-right  margin-r49 w90 " id="btnSwitch"/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main">
+        <div class="col-xs-12   margin-t40 ">
+            <span class="white font25 margin-l49">亮度</span>
+        </div>
+    </div>
+    <div class="row bg-main margin-t46 padding-b34">
+        <div class="col-xs-1   ">
+            <img src="img/light_least.png" class="img-responsive  center-block  margin-l49 w33">
+        </div>
+        <div class="col-xs-8 col-xs-offset-1      padding-lr13">
+            <input id="LightRange" type="text"/>
+        </div>
+        <div class="col-xs-1 col-xs-offset-1 ">
+            <img src="img/light_best.png" class=" img-responsive  center-block  pull-right  margin-r49 w33 ">
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main">
+        <div class="col-xs-12   margin-t40 ">
+            <span class="white font25 margin-l49">色温</span>
+        </div>
+    </div>
+    <div class="row bg-main  margin-t51">
+        <div class="col-xs-1   ">
+            <span class="white font24 margin-l49 ">暖</span>
+        </div>
+        <div class="col-xs-8  col-xs-offset-1 padding-lr24 ">
+            <input id="ctRange" type="text"/>
+        </div>
+        <div class="col-xs-1 col-xs-offset-1 ">
+            <span class="white font24 pull-right margin-r49">冷</span>
+        </div>
+    </div>
+    <div class="row bg-main margin-t38 margin-b36">
+        <div class="col-xs-4">
+            <img src="img/nuan_off.png" class="img-responsive center-block  margin-l49  w88" id="nuan"/>
+        </div>
+        <div class="col-xs-4">
+            <img src="img/zhong_off.png" class="img-responsive center-block    w88 " id="zhong"/>
+        </div>
+        <div class="col-xs-4">
+            <img src="img/leng_off.png" class="img-responsive center-block  margin-r49  w88" id="leng"/>
+        </div>
+    </div>
+    <!--<div class="divider1"></div>
+
+
+
+    <div class="row bg-main  " onclick="document.location=' timingList640.html'">
+
+        <div class="col-xs-12  margin-t40 margin-b36  ">  <span
+                class="font25 white   margin-b30 margin-l49">定时</span>
+            <img src="img/setting/setting_more.png"
+                 class="img-responsive center-block  di  pull-right  margin-r49  w19 margin-t2"/>
+        </div>
+
+    </div>-->
+    <div class="row    margin-t75">
+        <div class="col-xs-12  tac  ">
+            <!-- <a href="modelAddStep2.html">
+                 <img src="img/addTiming/wancheng.png" class="img-responsive center-block   w452     "/>
+             </a>-->
+            <span class="   btn_highlight_large " onclick="finish()">完成</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="js/deviceSetting.js"></script>
+<script src="js/bootstrap-slider.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+
+<script>
+    var model;
+    function loadPage() {
+        model = new Mode(undefined, getQueryString("modelID"), function (status) {
+            if (status == true) {
+                updatePage();
+            }
+        })
+    }
+
+    function updatePage() {
+        var switchPath = model.S == true ? "img/equipment_open.png" : "img/equipment_close.png";
+        $("#btnSwitch").attr("src",switchPath);
+        $("#LightRange").slider('setValue',model.W);
+        $("#ctRange").slider('setValue',model.Y);
+    }
+
+
+    if ('ontouchstart' in window) {
+        $("#btnSwitch").on("touchstart", select);
+    } else {
+        $("#btnSwitch").on("click", select);
+    }
+
+    function select() {
+        if($(this).attr("src") == "img/equipment_open.png"){
+            $(this).attr("src","img/equipment_close.png")
+        }else{
+            $(this).attr("src","img/equipment_open.png")
+        }
+    }
+
+
+
+    function finish() {
+
+        var s = true;
+        if ($("#btnSwitch").attr("src") == "img/equipment_open.png") {
+            s = true;
+        } else {
+            s = false;
+        }
+        console.log("开关" + s);
+
+        var w = $("#LightRange").slider('getValue');
+        var y = $("#ctRange").slider('getValue');
+        console.log("LightRange" + w);
+        console.log("ctRange" + y);
+
+        model.updateStautsWithSWY(s, w, y, function (success, data) {
+            console.log('data：' + JSON.stringify(data));
+            history.back();
+        });
+    }
+
+
+    // 冷中暖
+    $("#nuan").click(function () {
+
+        $("#LightRange").slider('setValue',50);
+        $('#ctRange').slider('setValue', 0);
+
+
+        $("#nuan").attr("src", "img/nuan_on.png");
+        $("#zhong").attr("src", "img/zhong_off.png");
+        $("#leng").attr("src", "img/leng_off.png");
+
+        zaDevice.staticChange(50,0);
+    });
+
+    $("#zhong").click(function () {
+        /*  $('#ctRange').slider('setValue', 50);
+         zaDevice.ctChange(50);*/
+        $("#LightRange").slider('setValue',100);
+        $('#ctRange').slider('setValue', 2*100/7);
+
+        $("#nuan").attr("src", "img/nuan_off.png");
+        $("#zhong").attr("src", "img/zhong_on.png");
+        $("#leng").attr("src", "img/leng_off.png");
+
+        zaDevice.staticChange(100,28.5);
+    });
+
+    $("#leng").click(function () {
+        $("#LightRange").slider('setValue',50);
+        $('#ctRange').slider('setValue', 100);
+
+        $("#nuan").attr("src", "img/nuan_off.png");
+        $("#zhong").attr("src", "img/zhong_off.png");
+        $("#leng").attr("src", "img/leng_on.png");
+
+        zaDevice.staticChange(50,100);
+    });
+</script>
+</body>
+</html>

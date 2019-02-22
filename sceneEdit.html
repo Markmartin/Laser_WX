@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--   <meta name="viewport"
+             content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>场景设置</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body   padding-b250" onpageshow="loadPage()">
+<div class="container-fluid ">
+    <div class="divider1"></div>
+    <div class="row bg-main" onclick="jumpToEditScenePage()">
+        <div class="col-xs-4   margin-tb35">
+            <span class="font26 white margin-l49">场景名称</span>
+        </div>
+        <div class="   pull-right  margin-tb35">
+            <span class="font26 white   margin-r22" id="sceneName">会客</span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49  margin-t13n  "/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row">
+        <div class="col-xs-12   margin-tb20">
+             <span class="font24  margin-l49  white">预设模式</span>
+        </div>
+    </div>
+
+    <div id="defaultModelList">
+
+    </div>
+
+
+    <div class="row">
+        <div class="col-xs-12">
+             <span class="font24     margin-l49   white  margin-tb18 fl">自定义模式</span>
+        </div>
+
+    </div>
+
+    <div id="customModelList">
+
+    </div>
+
+
+
+    <div class="row  bg-body  ">
+        <div class="col-xs-12 margin-t44 tac dn" id="deleteBtn">
+            <!--<img src="img/sceneSetting/delete.png" class="img-responsive center-block  w452" onclick="deleteScene()"/>-->
+            <span class="btn_normal_large" onclick="deleteScene()">删除场景</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+
+<script>
+    var scene;
+    var defaultModelsList;
+    var preInstallModelList ;
+
+    function loadPage() {
+        scene = new Scene(undefined,getQueryString("sceneID"),function (status) {
+            if (status == true){
+                if (scene.isDefault == 1)
+                {
+                    switch (scene.sceneName)
+                    {
+                        case "客厅":
+                        {
+                            preInstallModelList = Mode.defaultModelLsitOfType(defaultModelType.livingRoom);
+                            console.log(preInstallModelList);
+                        }
+                            break;
+                        case "卧室":
+                        {
+                            preInstallModelList = Mode.defaultModelLsitOfType(defaultModelType.bedRoom);
+                            console.log(preInstallModelList);
+                        }
+                            break;
+                        case "餐厅":
+                        {
+                            preInstallModelList = Mode.defaultModelLsitOfType(defaultModelType.diningRoom);
+                            console.log(preInstallModelList);
+                        }
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+
+                updatePage();
+                if (scene.isDefault != 1)
+                {
+                    $("#deleteBtn").removeClass("dn");
+                }
+            }
+        })
+//        defaultModelsList = Mode.getDefaultModelList();
+        defaultModelsList = Mode.defaultModelLsitOfType(defaultModelType.all);
+        updatePage();
+//        for (var index in scene.defaultModels)
+//        {
+//            scene.defaultModels[index].deleteModel(function () {
+//
+//            })
+//        }
+//
+//        for (var index in scene.customModels)
+//        {
+//            scene.customModels[index].deleteModel(function () {
+//
+//            })
+//        }
+    }
+
+
+    function refreshScene() {
+        scene.refreshScene(function (status) {
+            if (status == true)
+            {
+                updatePage();
+            }
+        })
+    }
+
+    function updatePage() {
+        $("#sceneName").text(scene.sceneName);
+        loadDefaultModelList();
+        loadCustomModelList();
+    }
+
+    function jumpToEditScenePage() {
+        $(location).attr("href", "EditSceneNameAndDevice.html?sceneID="+getQueryString("sceneID")+"&type=edit");
+    }
+
+    function loadDefaultModelList() {
+
+
+        var modelListHtml = "";
+        for (var i = 0; i < defaultModelsList.length; i++)
+        {
+            var insertHtml = "";
+            if (i%4 == 0)
+            {
+                var cellHtml = "";
+                cellHtml = cellHtml + "<div class='row bg-main padding-lr45'><div class='col-xs-12 margin-tb32  taj'>"
+                insertHtml = insertHtml + cellHtml;
+            }
+
+
+//            var onORoff = scene.inDefaultModel(defaultModelsList[i]) ? "_on" : "";
+
+            var onORoff = scene.inDefaultModel(defaultModelsList[i]) ? "on" : "off";
+
+
+            if (scene.isDefault == 1)
+            {
+                var has = false;
+                for (var index in preInstallModelList)
+                {
+                    if (Mode.equal(defaultModelsList[i],preInstallModelList[index]) == true)
+                    {
+                        has = true ;
+                        break ;
+                    }
+                }
+
+                onORoff = has ? "default" : onORoff ;
+            }
+
+            var imgPath = "img/model_icon/"+defaultModelsList[i].modeIcon+"_"+onORoff+".png";
+
+//            insertHtml = insertHtml + "<img src='"+imgPath+"' class='img-responsive center-block w108 di' onclick='DefaultModelEvent("+i+")' id='defaultModel_"+i+"'/>&nbsp";
+            insertHtml = insertHtml + '<div class="w108div  dib tac"  onclick="DefaultModelEvent('+i+')" id="defaultModel_'+i+'">'
+            +' <img src="'+imgPath+'" class="img-responsive center-block  w108    "/>'
+            +'<span class="font22    gray padding-t20  db  ofh line-h22 ">'+defaultModelsList[i].modeName+'</span>'
+            +'</div>&nbsp;';
+
+            if (i%4 == 3)
+            {
+                insertHtml = insertHtml + "</div></div>";
+            }
+
+            modelListHtml = modelListHtml + insertHtml ;
+        }
+
+        if (defaultModelsList.length%4 !=0 )
+        {
+            var cover = defaultModelsList.length%4;
+            var rest = 4-cover;
+            for (var index = 0; index < rest; index++)
+            {
+//                var insertHtml = "<img src='img/model_icon/model_0_off.png' class='img-responsive center-block   w108   di  vh'/>&nbsp";
+                var insertHtml = '<div class="w108div  dib tac vh">'
+                +'  <img src="img/model_icon/model_0_off.png" class="img-responsive center-block  w108    "/>'
+                +'  <span class="font22    gray padding-t20 db  ofh  line-h22">自定义模</span>'
+                +' </div>&nbsp;'
+                modelListHtml = modelListHtml + insertHtml;
+            }
+            modelListHtml = modelListHtml + "</div></div>";
+        }
+        $("#defaultModelList").html(modelListHtml);
+    }
+
+    function loadCustomModelList() {
+        var modelListHtml = "";
+        for (var i = 0; i < scene.customModels.length + 1; i++)
+        {
+            var insertHtml = "";
+            if (i%4 == 0)
+            {
+                var cellHtml = "";
+                cellHtml = cellHtml + "<div class='row bg-main padding-lr45'><div class='col-xs-12 margin-tb32  taj'>"
+                insertHtml = insertHtml + cellHtml;
+            }
+
+            var imgPath;
+            var imgName;
+            if (i == scene.customModels.length)
+            {
+//                imgPath = "img/scene/tianjia_off.png";
+                imgPath = "img/model_icon/add_off.png";
+                imgName = "自定义"
+            }
+            else
+            {
+                imgPath = "img/model_icon/"+scene.customModels[i].modeIcon+"_on"+".png";
+                imgName = scene.customModels[i].modeName;
+            }
+
+//            insertHtml = insertHtml + "<img src='"+imgPath+"' class='img-responsive center-block w108 di' onclick='CustomModelEvent("+i+")' id='customModel_"+i+"'/>&nbsp";
+            insertHtml = insertHtml +'<div class="w108div  dib tac  " onclick="CustomModelEvent('+i+')" id="customModel_'+i+'">'
+                +'<img src="'+imgPath+'" class="img-responsive center-block  w108    "/>'
+                +'<span class="font22    gray padding-t20   db   ofh line-h22">'+imgName+'</span>'
+                +'</div>&nbsp;';
+
+
+            if (i%4 == 3)
+            {
+                insertHtml = insertHtml + "</div></div>";
+            }
+
+            modelListHtml = modelListHtml + insertHtml ;
+        }
+
+        if ((scene.customModels.length+1)%4 !=0 )
+        {
+            var cover = (scene.customModels.length+1)%4;
+            var rest = 4-cover;
+            for (var index = 0; index < rest; index++)
+            {
+//                var insertHtml = "<img src='img/scene/langman_off.png' class='img-responsive center-block   w108   di  vh'/>&nbsp";
+                var insertHtml = '<div class="w108div  dib tac vh">'
+                    +'<img src="img/model_icon/model_0_off.png" class="img-responsive center-block  w108    "/>'
+                    +'<span class="font22    gray padding-t20 db  ofh  line-h22"></span>'
+                    +'</div>&nbsp;';
+
+                modelListHtml = modelListHtml + insertHtml;
+            }
+            modelListHtml = modelListHtml + "</div></div>";
+        }
+        $("#customModelList").html(modelListHtml);
+    }
+
+    function DefaultModelEvent(modelIndex) {
+        if (scene.isDefault == 1)
+        {
+            for (var index in preInstallModelList)
+            {
+                if (Mode.equal(defaultModelsList[modelIndex],preInstallModelList[index]) == true)
+                {
+                    has = true ;
+                    return;
+                }
+            }
+        }
+
+        if (scene.inDefaultModel(defaultModelsList[modelIndex]) == true)
+        {
+            $("#defaultModel__"+modelIndex).attr("src","img/model_icon/"+defaultModelsList[modelIndex].modeIcon+"_off.png");
+            defaultModelsList[modelIndex].deleteModel(function () {
+                    refreshScene();
+            })
+        }
+        else
+        {
+            $("#defaultModel__"+modelIndex).attr("src","img/model_icon/"+defaultModelsList[modelIndex].modeIcon+"_on"+".png");
+            scene.addDefaultModel(defaultModelsList[modelIndex],function () {
+                refreshScene();
+            })
+        }
+
+    }
+
+    function CustomModelEvent(modelIndex) {
+        if (modelIndex == scene.customModels.length)
+        {
+            //跳添加页面
+            $(location).attr("href", "modelAddStep1.html?sceneID="+scene.sceneId);
+        }
+        else
+        {
+            //删除自定义模式
+//            scene.customModels[modelIndex].deleteModel(function () {
+//                refreshScene();
+//            })
+            $(location).attr("href", "modelEdit.html?modelID="+scene.customModels[modelIndex].modeId);
+        }
+
+    }
+
+    function deleteScene() {
+        scene.deleteScene(function () {
+            history.back();
+        })
+    }
+
+    
+</script>
+</body>
+</html>

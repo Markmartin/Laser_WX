@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--    <meta name="viewport"
+              content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>模式编辑</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid ">
+    <div class="divider1"></div>
+    <div class="row bg-main   line-h90" onclick="updateModelNameEvent()">
+        <div class="col-xs-6    ">
+            <span class="font26 white margin-l49">修改模式名称</span>
+        </div>
+        <div class="pull-right">
+            <span class="font26 white  margin-r22"  id="modeName"></span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49  margin-t13n  "/>
+        </div>
+    </div>
+    <div class="divider1"></div>
+    <div class="row bg-main" onclick="updateModelIconEvent()">
+        <div class="col-xs-12  line-h144">
+            <span class="font26 white margin-l49 ">模式图标</span>
+            <div class="   pull-right ">
+                <img src="img/modelAdd/guanying_off.png" class="img-responsive center-block   di   w108  margin-r22  "  id="modeIcon"/>
+                <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49    "/>
+            </div>
+        </div>
+    </div>
+    <div class="row bg-main  margin-t75 line-h90" onclick="updateModelStatusEvent()">
+        <div class="col-xs-6    ">
+            <span class="font26 white margin-l49">灯光状态</span>
+        </div>
+        <div class="   pull-right">
+            <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49   margin-t13n"/>
+        </div>
+    </div>
+
+    <div class="row bg-main  margin-t75 line-h90" onclick="updateModelTimerListEvent()">
+        <div class="col-xs-4 margin-l49     ">
+            <span class="font26 white  ">定时</span>
+        </div>
+        <div class="   pull-right   ">
+            <span class="font26 white      margin-r22   "></span>
+            <img src="img/setting/setting_more.png" class="img-responsive center-block   di  w19   margin-r49   margin-t13n  "/>
+        </div>
+    </div>
+
+    <!--<div class="row    margin-t72">
+        <div class="col-xs-12  tac" >
+
+            <span class="   btn_highlight_large " onclick="finish()">完成</span>
+        </div>
+    </div>-->
+
+    <div class="row    margin-t72">
+        <div class="col-xs-12  tac" >
+
+            <span class="   btn_normal_large " onclick="deleteM()">删除</span>
+        </div>
+    </div>
+
+   <!-- <div class="row bg-body    margin-t75" onclick="document.location=' editCustomFastModeList.html'">
+        <div class="col-xs-12       padding-b20">
+            <a href="sceneAddStep2.html">
+                <img src="img/modelEdit/delete.png" class="img-responsive center-block      w452   "/>
+            </a>
+        </div>
+    </div>-->
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+
+<script src="device_js/Scene.js"></script>
+<script src="device_js/mode.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/zamode_timers.js"></script>
+<script src="device_js/timer.js"></script>
+
+<script>
+
+    var model ;
+    function loadPage() {
+        model = new Mode(undefined,getQueryString("modelID"),function (status) {
+            if (status == true){
+                initData();
+            }
+        })
+    }
+
+
+
+
+    function initData() {
+        console.log("mode.modeName"+model.modeName);
+        console.log("mode.modeIcon"+model.modeIcon);
+
+        $("#modeName").text(model.modeName);
+        $("#modeIcon").attr("src", "img/model_icon/"+model.modeIcon+"_off.png");
+    }
+
+
+
+    function deleteM() {
+        model.deleteModel(function(success,data){
+            console.log('success'+success);
+            console.log('data'+JSON.stringify(data));
+            //TODO  跳转去添加场景第二步  or 自定义模式列表？
+            history.back();
+        });
+    }
+
+
+    function updateModelNameEvent() {
+        $(location).attr("href", "modeUpdateName.html?modelID="+model.modeId);
+    }
+    
+    function updateModelIconEvent() {
+        $(location).attr("href", "modeEditIcon.html?modelID="+model.modeId);
+    }
+
+    function updateModelStatusEvent() {
+        $(location).attr("href", "modeDeviceLight.html?modelID="+model.modeId);
+    }
+
+
+
+    function updateModelTimerListEvent() {
+        $(location).attr("href", "modelTimerList.html?modelID="+model.modeId);
+    }
+
+    $(".btn_highlight_large").on("touchstart", function () {
+
+        $(this).addClass("btn_highlight_large_to");
+    });
+    $(".btn_highlight_large").on("touchend", function () {
+        $(this).removeClass("btn_highlight_large_to");
+    });
+    $(".btn_normal_large").on("touchstart", function () {
+        $(this).addClass("btn_normal_large_to");
+    });
+    $(".btn_normal_large").on("touchend", function () {
+        $(this).removeClass("btn_normal_large_to");
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>添加子设备</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+    <link href="css/weui.css" rel="stylesheet">
+</head>
+<body class="bg-body   ">
+<div class="container-fluid bg-body">
+    <div class="divider1"></div>
+    <div class="row     ">
+        <div class="col-xs-12 margin-t172   ">
+            <img src="img/addChildDevice/add_pic.png"
+                 class="img-responsive center-block    w139 "/>
+        </div>
+    </div>
+    <div class="row   margin-t93  ">
+        <div class="col-xs-12     tac  ">
+             <span
+                     class="font19 orange    ">长按遥控器"配网"键使灯进入慢闪模式</span>
+        </div>
+    </div>
+    <div class="row   margin-t11  ">
+        <div class="col-xs-12     tac  ">
+             <span
+                     class="font19 orange    ">确认灯已进入慢闪模式后点击添加按钮</span>
+        </div>
+    </div>
+
+    <div class="row margin-t94">
+        <div class="col-xs-12 tac" onclick="addDeviceEvent()">
+            <!--<img src="img/addChildDevice/tianjia.png" class="img-responsive center-block w450 btn_large"/>-->
+            <span class="   btn_highlight_large ">添加</span>
+        </div>
+    </div>
+</div>
+
+<div class="weui-toast" id="loading">
+    <i class="weui-loading weui-icon_toast"></i>
+    <p class="weui-toast__content">灯具绑定中</p>
+</div>
+
+<div class="weui-toast" id="tipMessage">
+    <i class="weui-icon-success-no-circle weui-icon_toast"></i>
+    <p class="weui-toast__content">灯具添加成功</p>
+</div>
+
+
+
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="js/gizwits_ws_0.3.0.min.js"></script>
+<script src="js/md5.min.js"></script>
+
+
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/utils.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/websocket.js"></script>
+<script src="device_js/websocket_instance.js"></script>
+<script type="text/javascript">
+    var gatewayDevice;
+    $(document).ready(function () {
+//        var device = $.cookie('device');
+        var device = localStorage.getItem('device');
+        gatewayDevice = new ZADevice(JSON.parse(device));
+        console.log("gatewayDevice===" + gatewayDevice);
+
+        var websocketInstance = GetWebSocketInstance();
+        websocketInstance.connectAndLogin(gatewayDevice,'custom');
+
+        $(".weui-toast").hide();
+    });
+
+    function addDeviceEvent(evt) {
+        $("#loading>p").text("灯具绑定中");
+        $("#loading").fadeIn();
+
+        gatewayDevice.addChildDevice(function (isSuccess,childDevice) {
+            if (isSuccess == true){
+                $("#loading").fadeOut();
+                $("#tipMessage>p").text("灯具添加成功");
+                $("#tipMessage").fadeIn();
+                setTimeout(function () {
+                    $("#tipMessage").fadeOut("normal", function () {
+                        setTimeout(function () {
+                            history.back();
+                        },1000)
+                    })
+                },2500)
+            }else {
+                $("#loading>p").text("灯具绑定失败");
+                setTimeout(function () {
+                    $("#loading").fadeOut();
+                }, 500)
+            }
+        })
+
+
+        setTimeout(function () {
+            $("#loading>p").text("灯具绑定超时");
+            setTimeout(function () {
+                $("#loading").fadeOut();
+            }, 500)
+        }, 30000);
+
+    }
+
+
+</script>
+
+</body>
+</html>

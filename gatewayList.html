@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <title>网关列表</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css?1" rel="stylesheet">
+    <link href="css/bootstrap.css.map">
+    <link href="css/swiper-3.4.2.min.css" rel="stylesheet">
+    <script>
+
+    </script>
+</head>
+<body class="bg-body " onpageshow="loadPage()">
+<!--<img src="img/device/wangguan_logo.png" class="img_gate_logo">-->
+<div class="container-fluid dn gate_content">
+    <div class="gate_wrapper">
+    <div class="divider2"></div>
+    <div id="list"></div>
+    <!--<span class="db gray99 margin-t18 font18 margin-l55">点击 “>” 进入灯具添加及灯具列表界面</span>-->
+    <div class="  gate_add" id="gate_add">
+        <div class="row margin-t73">
+            <div class="col-xs-12  tac">
+                <!--<img src="img/gatewayList/wangguan_add.png" class="img-responsive center-block  w452 btn_large" onclick="showQRcode()"/>-->
+                <span class=" btn_highlight_large " onclick="showQRcode()">添加网关</span>
+                <span class="db gray99 margin-t18 font18">可添加网关或添加另一台网关(属管理员权限)</span>
+            </div>
+
+
+            <div class="col-xs-12  tac margin-t40 margin-b60">
+                <!--<img src="img/gatewayList/wangguan_add.png" class="img-responsive center-block  w452 btn_large" onclick="showQRcode()"/>-->
+                <span class=" btn_highlight_large " onclick="gatewayScanQRCode()">添加被分享的网关</span>
+                <span class="db gray99 margin-t18 font18">扫描管理员分享的网关二维码(属非管理员权限)</span>
+            </div>
+        </div>
+    </div>
+    </div>
+    <nav class="navbar navbar-default navbar-fixed-bottom bg-body">
+        <div class="row padding-tb10">
+            <div class="col-xs-4 ">
+                <!--<img src="img/shebei_on.png" class="img-responsive  center-block     margin-tb10  w46 "/>-->
+                <div class="    tac  center-block">
+                    <img src="img/nav/nav_device_on.png" class="img-responsive center-block  w40    "/>
+                    <span class="font20     padding-t6   db   line-h22 yellow">设备</span>
+                </div>
+            </div>
+            <div class="col-xs-4">
+                <a href="scene.html">
+                    <!--<img src="img/changjing_off.png" class="img-responsive center-block    margin-tb10  w46 "/>-->
+                    <div class="    tac  center-block">
+                        <img src="img/nav/nav_room_off.png" class="img-responsive center-block  w40    "/>
+                        <span class="font20     padding-t6   db  line-h22 gray">场景</span>
+                    </div>
+                </a>
+            </div>
+            <div class="col-xs-4">
+                <a href="setting.html">
+                    <!--<img src="img/shezhi_off.png" class="img-responsive center-block     margin-tb10  w46"/>-->
+                    <div class="    tac  center-block">
+                        <img src="img/nav/nav_setting_off.png" class="img-responsive center-block  w40    "/>
+                        <span class="font20     padding-t6   db   line-h22 gray">设置</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </nav>
+    <div class="dn">
+        <span id="openid">${openid}</span>
+    </div>
+</div>
+
+
+<div class="swiper-container  "  >
+    <div class="swiper-wrapper">
+        <div class="swiper-slide slide_page1_content"><img src="img/guide/qidongye_logo.png"  /></div>
+        <div class="swiper-slide"><img src="img/guide/guide1.png" class="guide_img"/></div>
+        <div class="swiper-slide"><img src="img/guide/guide2.png" class="guide_img"/></div>
+        <div class="swiper-slide"><img src="img/guide/guide3.png" class="guide_img"/><img src="img/guide/zhidaola.png" class="realize" onclick="showContent(true)"/></div>
+    </div>
+    <div class="swiper-pagination swiper-pagination-h "></div>
+</div>
+<script type="text/javascript" src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/dn.js?1.1.3"></script>
+<script src="device_js/config.js?1.1.3"></script>
+<script src="device_js/net.js?1.1.3"></script>
+<script src="device_js/zadevice.js?1.1.3"></script>
+<script src="device_js/utils.js?1.1.3"></script>
+<script src="js/swiper-3.4.2.jquery.min.js"></script>
+<!--<script src="js/jquery.mobile-1.4.5.min.js"></script>-->
+<!--<script src="device_js/child_device.js"></script>-->
+<script type="text/javascript">
+    guide();
+    wx.config({
+        beta: true,
+        debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: '${appid}', // 必填，公众号的唯一标识
+        timestamp: '${signature.timestamp}', // 必填，生成签名的时间戳
+        nonceStr: '${signature.noncestr}', // 必填，生成签名的随机串
+        signature: '${signature.signature}',// 必填，签名，见附录1
+        jsApiList: ['scanQRCode', 'openWXDeviceLib', 'getWXDeviceTicket'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+    });
+
+
+    var gatewayList;
+    var finalHtml = '';
+
+    function loadPage() {
+
+        var cb = function (devices, childDevices) {
+
+//                for (var index in childDevices) {
+//                    var childDevice = childDevices[index];
+//                    var net = new Net();
+//                    net.unBindDevice(childDevice.did, function () {
+//
+//                    })
+//                }
+             // 虚拟列表测试
+
+            finalHtml = "";
+            if (devices.length == 0) {
+                console.log("没有绑定的设备");
+                $("#list").empty();
+                $("#list").html(finalHtml);
+            }
+            else {
+                gatewayList = devices;
+
+                for (var i = 0; i < devices.length; i++) {
+                    console.log("设备数组为:" + devices);
+                    console.log('=================第' + i + '个设备=================================');
+                    console.log("已绑定设备，did=" + devices[i].did + "\n已绑定设备，mac=" + devices[i].mac);
+                    console.log("已绑定设备，product_key=" + devices[i].product_key + "\n已绑定设备, dev_alias=" + devices[i].dev_alias);
+                    console.log("已绑定设备，is_online=" + devices[i].is_online);
+                    console.log("已绑定设备，是否是客人=" + devices[i].isGuest);
+                    console.log('=================第' + i + '个设备结束=================================');
+
+                    var online;
+                    var isOnlineImg;
+                    if (devices[i].is_online == true) {
+                        online = "在线"
+                        isOnlineImg = "img/equipment1_online.png";
+                    }
+                    else {
+                        online = "不在线"
+                        isOnlineImg = "img/equipment1_offline.png"
+                    }
+                    var isOwner = devices[i].isGuest == true ? "" : "(管理员)"
+                    var strHtml = "<div class='row bg-main'  >"
+                        + "<div class='col-xs-8  margin-t36  margin-b27'>"
+                        + "<img src='" + isOnlineImg + "' class='img-responsive  center-block margin-l48  w13    margin-t13n di'/>"
+                        + "<span class='font24 white   margin-l25'>" + devices[i].dev_alias + isOwner + "</span>"
+                        + "<span class='btn_normal_small_yellow margin-l20' >设置</span>"
+                        + "</div>"
+                        + "<div class='pull-right   margin-t36 '>"
+                        + "<span class='font24 white    margin-r56'>" + online + "</span>"
+                        + "<img src='img/setting/setting_more.png' class='img-responsive center-block    di  w20   margin-r49    margin-t13n'/>"
+                        + "</div>"
+                        + "</div>"
+                        + "<div class='divider1'>"
+                        + "</div>";
+                    finalHtml = finalHtml + strHtml;
+                    $("#list").empty();
+                    $("#list").html(finalHtml);
+                }
+                if (devices.length > 0) {
+                     var remarkHtml='<span class="db gray99 margin-t18 font18 margin-l55">点击 “>” 进入灯具添加及灯具列表界面</span>';
+                    $("#list").append(remarkHtml);
+                }
+                invalidate_btn_add();
+
+
+
+
+                $("#list .row").each(function (index, element) {
+                    $(this).click(function (event) {
+                        console.log(index);
+                        var device = gatewayList[index];
+                        if (device.is_online == true) {
+                            localStorage.setItem('device', JSON.stringify(device));
+//                            $(location).attr("href", "wx_device");
+                            $(location).attr("href", "device.html");
+                        }
+                    });
+                });
+
+                $(".btn_normal_small_yellow").each(function (index, element) {
+                    $(this).click(function (event) {
+                        console.log(index);
+                        event.stopPropagation();
+                        localStorage.setItem("GatewayDevice", JSON.stringify(gatewayList[index]));
+//                            if (gatewayList[index].getHasShareRole()) {
+//                                $(location).attr("href", "deviceGatewaySetting.html");
+//                            }
+//                            else {
+//                                $(location).attr("href", "EditDeviceName.html?type=GatewayDevice");
+//                            }
+                        $(location).attr("href", "deviceGatewaySetting.html");
+                    });
+                });
+
+
+            }
+        }
+
+        var net1 = new Net();
+        net1.login('${openid}', cb);
+
+        net1.GizwitsOpenAPI("/app/users","PUT",{"name":'${nickname}'},function (status,result) {
+            if (status == true){
+                console.log("修改用户信息成功");
+            }
+        })
+
+//            net1.login('ookFkwOSXzGvi7X1-Ypu-2GeepXI', cb);      //公司微信号的opneID
+//        net1.login('ookFkwIMit8D8zdGZPWqbgh7Tlm8', cb);    //储婷的微信号openID
+
+//            net1.login('ookFkwHQzbHUPwe68NCr3UYjEkns', cb);
+//            net1.login('ookFkwFMeD6YaKRNeJdtBeZV0GxE', cb);     //周金撒的微信号openID
+//            net1.login('ookFkwE7Ea2C2JVdFvh250XxJ5Eo', cb);    //子非鱼的微信号openID
+            net1.login('ookFkwBT3HLhpyymO49YulzOFwVA', cb);    //古月的微信号openID
+//            net1.login('ookFkwHQzbHUPwe68NCr3UYjEkns', cb);  //何凯的微信号
+//            net1.login('ookFkwP860DTvovfC8c6jHnmvXss', cb);   //陈
+
+//         localStorage.removeItem('visit_flag');//测试
+    }
+
+    function guide() {
+        localStorage.setItem("nickname",'${nickname}')
+        if (localStorage.getItem('visit_flag')) {
+            showContent(true);
+        } else {
+            showContent(false);
+            localStorage.setItem('visit_flag', true);
+        }
+    }
+
+    var mySwiper = new Swiper ('.swiper-container', {
+        pagination: '.swiper-pagination',
+    })
+
+    function showContent(flag) {
+        if(flag){
+            $(".container-fluid").removeClass("dn");
+            $(".swiper-container").addClass("dn");
+        }else{
+            $(".container-fluid").addClass("dn");
+            $(".swiper-container").removeClass("dn");
+        }
+        invalidate_btn_add();
+    }
+
+
+    function invalidate_btn_add() {
+       /* var X = $('#list').outerHeight(true);
+        var Y = $('#gate_add').offset().top;*/
+        if($('#list').outerHeight(true)>$('#gate_add').offset().top){
+            $('#gate_add').removeClass("gate_add");
+        } ;
+    }
+
+
+</script>
+</body>
+</body>
+</html>

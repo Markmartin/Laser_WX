@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--    <meta name="viewport"
+              content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>-->
+    <title>定时</title>
+    <script src="js/flexible.js"></script>
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/device640.css" rel="stylesheet">
+</head>
+<body class="bg-body" onpageshow="loadPage()">
+<div class="container-fluid ">
+    <div id="contentA"></div>
+    <!--    <div class="divider1"></div>
+        <div class="row bg-main">
+            <div class="col-xs-10">
+                <div class="row">
+                    <div class="col-xs-12    margin-t41">
+                        <span class="font25 white margin-l49">9:15开启</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12  margin-t17   ">
+                        <span
+                                class="font25 white fl   margin-l49 margin-b37">每周一、周二、周三</span>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-2   " >
+                <img src="img/equipment_close.png"
+                     class="   center-block pull-right margin-r49 w90 margin-t51" id="switch_0"/>
+
+            </div>
+        </div>-->
+    <!--<div class="divider1"></div>
+
+    <div class="row bg-main">
+        <div class="col-xs-10">
+            <div class="row">
+                <div class="col-xs-12    margin-t41">
+                    <span class="font25 white margin-l49">22:00关闭</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12  margin-t17   ">
+                    <span
+                            class="font25 white fl   margin-l49 margin-b37">每周一、周二、周三</span>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-2   " >
+            <img src="img/equipment_close.png"
+                 class="   center-block pull-right margin-r49 w90 margin-t51" id="btnSwitch02"/>
+
+        </div>
+    </div>-->
+    <div class="row      ">
+        <div class="col-xs-12 margin-t25    ">
+            <span class="  font22  margin-l49   margin-b20 gray">(可同时添加多个定时，实现对某一时段的定时)</span>
+        </div>
+    </div>
+    <div class="row    ">
+        <div class="col-xs-12   margin-t80     padding-b20 tac">
+
+            <!--<img src="img/timing/time_add.png" class="img-responsive center-block      w452  btn_large " id="add"/>-->
+            <span class="   btn_highlight_large " id="add">添加定时</span>
+        </div>
+    </div>
+</div>
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery.cookie.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/btn_press.js"></script>
+<script src="js/gizwits_ws_0.3.0.min.js"></script>
+<script src="device_js/config.js"></script>
+<script src="device_js/net.js"></script>
+<script src="device_js/zadevice.js"></script>
+<script src="device_js/timer.js"></script>
+<script>
+    var zaDevice;
+    var finalHtml = "";
+    var timerListObj;
+
+    function loadPage() {
+        var  device = localStorage.getItem('ChilidDevice');
+
+        zaDevice = new ZADevice(JSON.parse(device));
+        zaDevice.getTimerList(function (cb, result) {
+            console.log('text：' + JSON.stringify(zaDevice.timerList));
+            timerListObj = zaDevice.timerList;
+            //TODO
+//            alert(JSON.stringify(zaDevice.timerList[0]));
+            updateList(zaDevice.timerList);
+        });
+    }
+
+
+    function updateList(result) {
+//        for (var i = 0; i < devices.length; i++) {
+        for (var i = 0; i < result.length; i++) {
+
+            var switchPath;
+            if (result[i].enabled == true) {
+                switchPath = "img/equipment_open.png";
+
+            } else {
+                switchPath = "img/equipment_close.png";
+            }
+            var tweekdayCN = result[i].weekdayCN;
+            if (tweekdayCN != null && tweekdayCN != undefined && tweekdayCN != '' && tweekdayCN != 'null') {
+                tweekdayCN = "每" + tweekdayCN;
+            } else {
+                tweekdayCN = "永不";
+            }
+            console.log('text：' + result[i].weekdayCN);
+
+            var appendHtml = '<div class="divider1"></div>'
+                + '<div class="row bg-main">'
+                + '<div class="col-xs-10" onclick="goToEditPage(' + i + ')">'
+                + ' <div class="row">'
+                + '<div class="col-xs-12    margin-t41">'
+                + '<span class="font25 white margin-l49">' + result[i].localTime + result[i].timerEvent + '</span>'
+                + ' </div>'
+                + ' </div>'
+                + '<div class="row">'
+                + ' <div class="col-xs-12  margin-t17   ">'
+                + '  <span'
+                + ' class="font25 white fl   margin-l49 margin-b37">' + tweekdayCN + '</span>'
+
+                + ' </div>'
+                + '</div>'
+                + '</div>'
+                + ' <div class="col-xs-2   "  onclick="toggleSwitch(' + i + ')">'
+                + ' <img src="' + switchPath + '"'
+                + 'class="   center-block pull-right margin-r49 w90 margin-t51" id="switch_' + i + '"/>'
+
+                + '</div>'
+                + '  </div>';
+
+            finalHtml = finalHtml + appendHtml;
+
+        }
+
+
+        $("#contentA").html(finalHtml);
+
+
+    }
+
+
+
+    function toggleSwitch(i) {
+
+
+        if ($("#switch_" + i).attr("src") === "img/equipment_open.png") {
+            $("#switch_" + i).attr("src", "img/equipment_close.png");
+            zaDevice.switchTimer(false, timerListObj[i], cb);
+        } else {
+            $("#switch_" + i).attr("src", "img/equipment_open.png");
+            zaDevice.switchTimer(true, timerListObj[i], cb);
+        }
+
+
+    }
+    var cb = function (data, result) {
+//            console.log('页面回调'+data);
+        if (data == true) {
+            //TODO
+            console.log('页面回调' + JSON.stringify(result));
+//            $(location).attr("href", "timingList.html");
+        } else {
+//            console.log('出错啦' + result);
+            alert('出错啦:' + result);
+        }
+
+    };
+
+
+
+    //新增按钮
+    $("#add").click(function () {
+
+
+        /*var text = "";
+         $("#btnSwitch01,#btnSwitch02").each(function () {
+         if ($(this).attr("src") === "img/equipment_open.png") {
+         text += true + ",";
+         } else {
+         text += false + ",";
+         }
+         });
+         console.log(text.substr(0, text.length - 1));//如true,false*/
+        //清空
+        $.cookie('timing_type', null);
+        $.cookie('timing_enabled', null);
+        $.cookie('timing_picker', null);
+        $.cookie('repeatText', null);
+        $.cookie('repeatVal', null);
+
+        localStorage.setItem('timing_type',null);
+        localStorage.setItem('timing_enabled',null);
+        localStorage.setItem('timing_picker',null);
+        localStorage.setItem('repeatText',null);
+        localStorage.setItem('repeatVal',null);
+
+        //设置
+        $.cookie('timing_type', 'add');
+        localStorage.setItem('timing_type','add');
+
+
+//        $(location).attr("href", "timingAdd.html");
+        localStorage.setItem('weekdayCN',JSON.stringify(new  Array()));
+        $(location).attr("href", "modelTimerAdd.html?did="+zaDevice.did+"&pageType=3");
+    });
+
+
+    function goToEditPage(i) {
+
+        //清空
+//        $.cookie('timing_enabled', null);
+//        $.cookie('timing_picker', null);
+//        $.cookie('repeatText', null);
+//        $.cookie('repeatVal', null);
+//
+//        localStorage.setItem('timing_enabled',null);
+//        localStorage.setItem('timing_picker',null);
+//        localStorage.setItem('repeatText',null);
+//        localStorage.setItem('repeatVal',null);
+//
+//        //设置
+//        $.cookie('timing_type', 'edit');
+//        $.cookie('timingItemObj', JSON.stringify(timerListObj[i]));
+//        localStorage.setItem('timing_type','edit');
+
+        localStorage.setItem('timingItemObj',JSON.stringify(timerListObj[i]));
+        localStorage.setItem('weekdayCN',JSON.stringify(timerListObj[i].weekdayCN));
+        $(location).attr("href", "modelTimerAdd.html?did="+zaDevice.did+"&pageType=4");
+//        $(location).attr("href", "timingAdd.html");
+    }
+</script>
+</body>
+</html>

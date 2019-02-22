@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>js-sdk-test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/jquery.cookie.min.js"></script>
+
+    <script src="http://cdn.bootcss.com/blueimp-md5/1.1.0/js/md5.js"></script>
+    <script src="http://cdn.bootcss.com/blueimp-md5/1.1.0/js/md5.min.js"></script>
+    <script src="device_js/config.js"></script>
+    <!-- <script src="../device_js/Control.js"></script> -->
+    <script src="device_js/net.js"></script>
+    <script src="device_js/utils.js"></script>
+    <script src="device_js/zadevice.js"></script>
+    <script src="device_js/Scene.js"></script>
+    <script src="device_js/mode.js"></script>
+    <script src="device_js/zamode_timers.js"></script>
+    <script src="device_js/timer.js"></script>
+    <!-- <script src="../device_js/child_device.js"></script> -->
+    <script type="text/javascript">
+
+
+        var gatewayDevice;
+        var childDevice;
+        var sceneMode;
+        var mode;
+
+        $(document).ready(function () {
+
+            var now = new Date();
+            console.log("现在时间是:" + now + "***" + now.toUTCString());
+
+
+            console.log("UTC时间字符串:" + now.getUTCFullYear() + "-" + now.getUTCMonth() + "-" + now.getUTCDate() + " " + now.getUTCHours() + ":" + now.getUTCMinutes() + ":" + now.getUTCSeconds());
+
+            var utc = Date.UTC(now.getUTCFullYear(), now.getUTCFullYear(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+            console.log("UTC毫秒数:" + utc);
+
+            var final = new Date(utc);
+            console.log("换算UTC毫秒数算出的时间:" + final);
+
+            var utcDate = new Date(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+            console.log("UTC时间:" + utcDate);
+            var date = new Date(utcDate.getTime() + 8 * 60 * 60 * 1000);
+            console.log("根据UTC时间得出的本地时间:" + date);
+
+
+        });
+
+
+        //获取网关列表示例
+        function buttonClick() {
+            // var config = new Config();
+            // var timestamp = Date.parse(new Date());
+            //   console.log('timestamp：'+timestamp+':'+config.product_key);
+            // var str = (config.product_key+timestamp);
+            // console.log('md5前的'+str);
+            // var hash = md5(str);
+            //     console.log('md5后的'+str);
+            var cb = function (devices, childArray) {
+                if (devices.length == 0) {
+                    console.log("没有绑定的设备");
+                }
+                else {
+                    for (var i = 0; i < devices.length; i++) {
+                        var device = devices[i];
+                        console.log('=================第' + i + '个设备=================================');
+                        console.log("已绑定设备，did=" + devices[i].did + "\n已绑定设备，mac=" + devices[i].mac);
+                        console.log("已绑定设备，product_key=" + devices[i].product_key + "\n已绑定设备, dev_alias=" + devices[i].dev_alias);
+                        console.log("已绑定设备，is_online=" + devices[i].is_online);
+                        console.log('=================第' + i + '个设备结束=================================');
+                        if (device.is_online) {//这里只是为了测试方便，因为测试页无法选择gateway；
+                            gatewayDevice = device;
+                            console.log("随机选择一个设备作为需要连接的设备以最后一条为准：" + devices.dev_alias + 'did:' + devices[i].did);
+                        }
+                    }
+                }
+            };
+
+            var net1 = new Net();
+            net1.login('ookFkwOSXzGvi7X1-Ypu-2GeepXI', cb);
+
+
+        }
+
+        //获取网关子设备列表示例
+        function getChildDeviceListButtonClick() {
+            var getChildDeviceCB = function (devices) {
+                for (var i = 0; i < devices.length; i++) {
+                    childDevice = devices[i];
+
+                    console.log('=================第' + i + '个虚拟设备=================================');
+                    console.log("已绑定设备，did=" + childDevice.did + "\nis_online=" + childDevice.is_online);
+                    console.log("已绑定设备，pk=" + childDevice.product_key);
+                    console.log('=================第' + i + '个虚拟设备结束=================================');
+
+                    childDevice.setStatusChangeNotify(function (type) {
+                        console.log('收到状态变化通知：' + type);
+                        if (type == StatusChangeNotiType.StatusChangeNotiTypeStatus) {
+                            console.log('收到颜色等状态变化通知：' + JSON.stringify(childDevice));
+                        }
+                    });
+                    childDevice.readStatus();
+
+
+                }
+            };
+
+            //   var socketCB = function (status) {
+            //   console.log('收到socket状态回调:'+status);
+            //   //socket状态回调示例，页面一定要监听socket状态
+            // }
+            var net = new Net();
+            net.getChildDeviceList(gatewayDevice, getChildDeviceCB)
+        }
+
+
+        function addButtonClick() {
+            // {"dev_alias": 设备, "product_key":c79af54b8ace4cf3b062bdcc9803830c, "mac": 0101100108, "remark": ""}
+            var back = function (diffDevice) {
+                console.log('添加设备设备回调:' + JSON.stringify(diffDevice));
+
+            };
+            gatewayDevice.addChildDevice(back);
+        }
+        function deleteBButtonClick() {
+
+            var back = function (data) {
+                console.log('删除设备页面回调' + data);
+            };
+// childDevice.sdid
+            gatewayDevice.deleteChildDevice(childDevice.sdid, childDevice.did, back);
+            // gatewayDevice.deleteChildDevice(00000028,'jJhYGPWKqDuMxuwSA4MipM',back);
+        }
+
+        function openButtonClick() {
+            // childDevice.openORclose(true);
+
+            // childDevice.openORclose(true);
+
+            var config = new Config();
+            var url = config.GizwitsHost + "/app/control/" + 'QXGhDTr2T7cLR2ySzoGsqC';
+            var params = {
+                "attrs": {
+                    // "S": true,
+                    'Y': 100,
+                    'W': 0,
+                }
+            };
+            var net = new Net();
+            net.GizwitsOpenAPI(url, "POST", params, undefined);
+
+
+        }
+        function closeButtonClick() {
+            // childDevice.openORclose(false);
+            // childDevice.openORclose(false);
+            var config = new Config();
+            var url = config.GizwitsHost + "/app/control/" + 'QXGhDTr2T7cLR2ySzoGsqC';
+            var params = {
+                "attrs": {
+                    //  "S": false,
+                    'Y': 100,
+                    'W': 100,
+                }
+            };
+            var net = new Net();
+            net.GizwitsOpenAPI(url, "POST", params, undefined);
+        }
+        function ct1ButtonClick() {
+            childDevice.ctChange(80);
+        }
+
+        function ct2ButtonClick() {
+            childDevice.ctChange(50);
+        }
+        function bright1ButtonClick() {
+            childDevice.brightChange(80);
+        }
+
+        function bright2ButtonClick() {
+            childDevice.brightChange(50);
+        }
+
+        function getSecneList() {
+
+            Scene.getSceneList(function (success, data) {
+                sceneMode = data[0];
+            });
+        };
+
+        function addSecne() {
+            Scene.addScene('测试场景', function (success, data) {
+                console.log('测试场景回调 ： ' + data);
+            });
+        }
+
+        function addDefaultModel() {
+            sceneMode.addDefaultModel("默认模式", 'mode_default_2', function (success, data) {
+
+            });
+
+        }
+
+        function addCustomModel() {
+            sceneMode.addCustomModel("客户模式", 'mode_default_1', function (success, data) {
+                console.log('客户模式:', JSON.stringify(data));
+            });
+        }
+        function refreshScene() {
+            sceneMode.refreshScene(function (success, data) {
+                mode = sceneMode.customModels[0];
+                console.log('刷新数据' + mode.modeName);
+            });
+        }
+
+
+        function editName() {
+            mode.updateName('修改名字1', function (success, data) {
+                console.log('修改名字回调：' + success);
+            });
+
+        }
+
+        function editICON() {
+            mode.updateIcon('mode_default_3', function (success, data) {
+                console.log('icon名字回调：' + success);
+            });
+
+        }
+        function editModeStauts() {
+            mode.updateIcon('icon', function (success, data) {
+                console.log('icon名字回调：' + success);
+            });
+
+        }
+        function refreshMode() {
+            mode.refreshMode(function (success, data) {
+                console.log('mode刷新：' + success);
+            });
+
+        }
+        var modetimers;
+
+        function getTimingList() {
+            modetimers = new ModeTimers(undefined);
+            modetimers.getModeTimerList(function (success) {
+                console.log('getTimingList获得回调' + JSON.stringify(modetimers));
+                modetimers.setModeTimerToDevice(['QXGhDTr2T7cLR2ySzoGsqC'], function (data) {
+
+                });
+            });
+
+        }
+        function addTiming() {
+            var modetimers = new ModeTimers(undefined);
+            // repeat,date,deviceState,weakadys,cb
+            var data = new Date();
+            modetimers.addModeTimer(true, data, true, [1, 2, 3], function (success) {
+                console.log('addTiming获得回调' + JSON.stringify(modetimers));
+
+            });
+        }
+        function delTiming() {
+            var modetimers = new ModeTimers(undefined);
+            modetimers.delModeTimer(1, function (success) {
+
+            });
+            modetimers.delModeTimer(2, function (success) {
+
+            });
+        }
+        function modifyTiming() {
+
+
+        }
+        function updateGatewayName() {
+            gatewayDevice.updateName("小雷士网关",function (status,resp) {
+
+            })
+        }
+
+        function gatewayShare() {
+            gatewayDevice.share(function (status,resp) {
+                if (status == true)
+                {
+
+                }
+            })
+        }
+
+
+
+    </script>
+</head>
+<body>
+
+<button id="newObj7" onclick="buttonClick()">获取设备列表</button>
+<button id="newObj6" onclick="getChildDeviceListButtonClick()">连接gateway并获取子设备</button>
+<!-- <button id="newObj5" onclick="getChildDeviceList()">获取子设备</button> -->
+<button id="newObj3" onclick="deleteBButtonClick()">删除子设备</button>
+<button id="newObj4" onclick="addButtonClick()">添加子设备</button>
+<button id="newObj4" onclick="openButtonClick()">开子设备</button>
+<button id="newObj4" onclick="closeButtonClick()">关子设备</button>
+<button id="1" onclick="ct1ButtonClick()">色温80</button>
+<button id="2" onclick="ct2ButtonClick()">色温50</button>
+<button id="1" onclick="bright1ButtonClick()">亮度80</button>
+<button id="2" onclick="bright2ButtonClick()">亮度50</button>
+
+
+<button id="2" onclick="getSecneList()">获取场景列表</button>
+<button id="2" onclick="addSecne()">添加场景</button>
+<button id="2" onclick="addDefaultModel()">添加默认模式</button>
+<button id="2" onclick="addCustomModel()">添加自定义模式</button>
+<button id="2" onclick="refreshScene()">刷新场景</button>
+
+
+<button id="2" onclick="editName()">修改模式名字</button>
+<button id="2" onclick="editICON()">修改模式的icon</button>
+<button id="2" onclick="editModeStauts()">修改模式状态</button>
+<button id="2" onclick="refreshMode()">刷新模式</button>
+
+
+<button id="2" onclick="getTimingList()">获取模式下定时列表</button>
+<button id="2" onclick="addTiming()">添加定时</button>
+<button id="2" onclick="delTiming()">删除定时</button>
+<button id="2" onclick="modifyTiming()">修改定时</button>
+
+<button id="2" onclick="updateGatewayName()">修改设备名称</button>
+<button id="2" onclick="gatewayShare()">分享</button>
+</body>
+</html>
